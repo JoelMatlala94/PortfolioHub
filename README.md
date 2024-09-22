@@ -7,18 +7,27 @@ PortfolioHub is an IOS/Android/Mobile Web Application that is a Stock Portfolio/
 - [Amir Badrudeen](https://github.com/amirb2607)
 - [Joel Matlala](https://github.com/JoelMatlala94)
 
-## Installation
+## Get Started
+1. Install dependencies
 
-TBD
+   ```bash
+   npm install
+   ```
 
-```python
-TBD
-```
+2. Start the app
+
+   ```bash
+   npx expo start
+   ```
+
 ## Usage
 
-```python
-TBD
-```
+In the output, you'll find options to open the app in a
+
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
 ## Contributing
 
