@@ -37,4 +37,4 @@ Please make sure to update tests as appropriate.
 
 ## License
 
-[GNU GPLv3]([https://choosealicense.com/licenses/mit/](https://choosealicense.com/licenses/gpl-3.0/))
+[GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
