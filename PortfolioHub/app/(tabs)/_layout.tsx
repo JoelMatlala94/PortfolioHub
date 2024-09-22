@@ -1,6 +1,7 @@
 import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Foundation from '@expo/vector-icons/Foundation';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Link, Tabs } from 'expo-router';
 import { Pressable } from 'react-native';
 
@@ -23,6 +24,13 @@ function TabBarIcon2(props: {
   return <Foundation size={35} style={{ marginBottom: -3 }} {...props} />;
 }
 
+function TabBarIcon3(props: {
+  name: React.ComponentProps<typeof Ionicons>['name'];
+  color: string;
+}) {
+  return <Ionicons size={35} style={{ marginBottom: -3 }} {...props} />;
+}
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
@@ -38,6 +46,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
+          headerTitleAlign: 'center',       //Aligns the Title of the Tab Screen to the center!
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
           headerRight: () => (
             <Link href="/modal" asChild>
@@ -80,7 +89,7 @@ export default function TabLayout() {
         name="settings"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color }) => <TabBarIcon name="gear" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon3 name="settings-outline" color={color} />,
         }}
       />
     </Tabs>
