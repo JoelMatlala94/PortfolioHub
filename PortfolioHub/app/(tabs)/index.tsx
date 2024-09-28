@@ -6,7 +6,7 @@ import HomePortfolioView from '@/components/HomePortfolioView';
 export default function HomeScreen() {
   return (
     <View style={styles.container}>
-      <HomePortfolioView></HomePortfolioView>
+      <HomePortfolioView />
     </View>
   );
 }
