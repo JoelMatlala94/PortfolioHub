@@ -8,7 +8,13 @@ PortfolioHub is an IOS/Android/Mobile Web Application that is a Stock Portfolio/
 - [Joel Matlala](https://github.com/JoelMatlala94)
 
 ## Get Started
-1. Install dependencies
+1. Move to PortfolioHub app folder.
+
+   ```bash
+   cd PortfolioHub
+   ``` 
+
+2. Install dependencies
 
    ```bash
    npm install
