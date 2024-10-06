@@ -43,13 +43,13 @@ export default function TabLayout() {
         headerShown: useClientOnlyValue(false, true),
       }}>
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
           title: 'Home',
           headerTitleAlign: 'center',       //Aligns the Title of the Tab Screen to the center!
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
           headerRight: () => (
-            <Link href="/modal" asChild>
+            <Link href="/help" asChild>
               <Pressable>
                 {({ pressed }) => (
                   <FontAwesome
@@ -82,6 +82,7 @@ export default function TabLayout() {
         name="news"
         options={{
           title: 'News',
+          headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="newspaper-o" color={color} />,
         }}
       />

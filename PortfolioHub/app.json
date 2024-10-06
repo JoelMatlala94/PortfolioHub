@@ -19,7 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#2e4ebf"
-      }
+      },
+      "package": "com.anonymous.PortfolioHub"
     },
     "web": {
       "bundler": "metro",

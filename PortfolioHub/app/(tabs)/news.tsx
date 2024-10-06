@@ -3,7 +3,7 @@ import { StyleSheet, FlatList, ActivityIndicator, Image, TouchableOpacity, Linki
 import axios from 'axios';
 import { Text, View } from '@/components/Themed';
 
-const API_KEY = 'U9O6HDKL1PQYYUG2';
+const API_KEY = process.env.STOCK_API_KEY;
 const ALPHA_VANTAGE_NEWS_URL = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&apikey=${API_KEY}`;
 
 export default function NewsScreen() {
@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
+    paddingTop: 50,
     fontWeight: 'bold',
     color: '#fff', 
     marginBottom: 20,

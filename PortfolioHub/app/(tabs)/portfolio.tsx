@@ -1,6 +1,7 @@
 import { StyleSheet, Button, Modal, TextInput, Alert, FlatList, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import { Text, View } from '@/components/Themed';
+const API_KEY = process.env.STOCK_API_KEY;
 
 export default function PortfolioScreen() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -17,7 +18,7 @@ export default function PortfolioScreen() {
     }
 
     try {
-      const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${stockSymbol}&apikey=YOUR_API_KEY`);
+      const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${stockSymbol}&apikey=${API_KEY}}`);
       const data = await response.json();
       const bestMatch = data.bestMatches[0];
 
