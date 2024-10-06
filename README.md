@@ -20,7 +20,7 @@ PortfolioHub is an IOS/Android/Mobile Web Application that is a Stock Portfolio/
    npm install
    ```
 
-2. Start the app
+3. Start the app
 
    ```bash
    npx expo start
