@@ -1,15 +1,20 @@
-import { StyleSheet, Button, Modal, TextInput, Alert, FlatList, TouchableOpacity } from 'react-native';
-import React, { useState } from 'react';
-import { Text, View } from '@/components/Themed';
-const API_KEY = process.env.STOCK_API_KEY;
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Button, Modal, TextInput, Alert, FlatList, TouchableOpacity, View, Text } from 'react-native';
 
-export default function PortfolioScreen() {
+const API_KEY = '2GSU1KK6959SOM26'; // Replace with your actual API key
+
+const PortfolioScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [stockSymbol, setStockSymbol] = useState('');
   const [quantity, setQuantity] = useState('');
   const [stocks, setStocks] = useState([]);
-  const [selectedStock, setSelectedStock] = useState(null);
+  const [cryptos, setCryptos] = useState([]);
+  const [stockPrices, setStockPrices] = useState({});
+  const [cryptoPrices, setCryptoPrices] = useState({});
+
+  useEffect(() => {
+    fetchCryptoPrices();
+  }, [cryptos]);
 
   const handleAddStock = async () => {
     if (!stockSymbol || !quantity) {
@@ -18,20 +23,19 @@ export default function PortfolioScreen() {
     }
 
     try {
-      const response = await fetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${stockSymbol}&apikey=${API_KEY}}`);
+      const response = await fetch(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${stockSymbol}&apikey=${API_KEY}`);
       const data = await response.json();
-      const bestMatch = data.bestMatches[0];
+      const stockData = data['Global Quote'];
 
-      if (!bestMatch) {
+      if (!stockData) {
         Alert.alert('Error', 'Stock symbol not found.');
         return;
       }
 
-      const stockName = bestMatch['2. name'];
-      const purchasePrice = 100;
+      const stockName = stockData['01. symbol'];
+      const purchasePrice = parseFloat(stockData['05. price']);
 
-      setStocks([...stocks, { symbol: stockSymbol.toUpperCase(), name: stockName, quantity, purchasePrice }]);
-
+      setStocks([...stocks, { symbol: stockName, name: stockName, quantity: Number(quantity), purchasePrice }]);
       setStockSymbol('');
       setQuantity('');
       setModalVisible(false);
@@ -40,33 +44,83 @@ export default function PortfolioScreen() {
     }
   };
 
+  const fetchCryptoPrices = async () => {
+    const cryptoSymbols = ['BTC', 'ETH']; // Add more cryptocurrencies as needed
+    const newCryptoPrices = {};
+
+    for (const symbol of cryptoSymbols) {
+      try {
+        const response = await fetch(`https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${symbol}&to_currency=USD&apikey=${API_KEY}`);
+        const data = await response.json();
+        const cryptoData = data['Realtime Currency Exchange Rate'];
+
+        if (cryptoData) {
+          newCryptoPrices[symbol] = parseFloat(cryptoData['5. Exchange Rate']);
+        }
+      } catch (error) {
+        console.error(`Failed to fetch price for ${symbol}:`, error);
+      }
+    }
+
+    setCryptoPrices(newCryptoPrices);
+  };
+
+  const handleAddCrypto = (symbol) => {
+    const cryptoQuantity = 2; // Placeholder quantity
+    const cryptoPurchasePrice = cryptoPrices[symbol] || 0; // Use fetched price
+
+    if (cryptoPurchasePrice === 0) {
+      Alert.alert('Error', 'Crypto price not available.');
+      return;
+    }
+
+    setCryptos([...cryptos, { symbol, name: symbol, quantity: cryptoQuantity, purchasePrice: cryptoPurchasePrice }]);
+    Alert.alert('Success', `${symbol} added successfully!`);
+  };
+
   const renderStockItem = ({ item }) => (
-    <TouchableOpacity 
-      style={styles.stockItem} 
-      onPress={() => {
-        setSelectedStock(item);
-        setDetailModalVisible(true);
-      }}
-    >
-      <Text style={styles.stockText}>{item.symbol} - {item.name} - Quantity: {item.quantity}</Text>
+    <TouchableOpacity style={styles.stockItem}>
+      <Text style={styles.stockText}>
+        {item.symbol} - {item.name} - Quantity: {item.quantity} - Price: ${item.purchasePrice.toFixed(2)}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  const renderCryptoItem = ({ item }) => (
+    <TouchableOpacity style={styles.stockItem}>
+      <Text style={styles.stockText}>
+        {item.symbol} - {item.name} - Quantity: {item.quantity} - Price: ${item.purchasePrice.toFixed(2)}
+      </Text>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Portfolio</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      
-      <Button title="Add Stock" onPress={() => setModalVisible(true)} color="#007BFF" />
-      
-      <FlatList
-        data={stocks}
-        renderItem={renderStockItem}
-        keyExtractor={(item, index) => index.toString()}
-        style={styles.stockList}
-      />
 
-      {/* Add Stock Modal */}
+      <View style={styles.horizontalContainer}>
+        <View style={styles.listContainer}>
+          <Text style={styles.tabTitle}>Stocks</Text>
+          <FlatList
+            data={stocks}
+            renderItem={renderStockItem}
+            keyExtractor={(item, index) => index.toString()}
+          />
+          <Button title="Add Stock" onPress={() => setModalVisible(true)} />
+        </View>
+
+        <View style={styles.listContainer}>
+          <Text style={styles.tabTitle}>Crypto</Text>
+          <FlatList
+            data={cryptos}
+            renderItem={renderCryptoItem}
+            keyExtractor={(item, index) => index.toString()}
+          />
+          <Button title="Add Crypto (BTC)" onPress={() => handleAddCrypto('BTC')} />
+          <Button title="Add Crypto (ETH)" onPress={() => handleAddCrypto('ETH')} />
+        </View>
+      </View>
+
       <Modal
         animationType="slide"
         transparent={true}
@@ -92,46 +146,42 @@ export default function PortfolioScreen() {
           <Button title="Cancel" onPress={() => setModalVisible(false)} color="#FF3D00" />
         </View>
       </Modal>
-
-      {/* Stock Details Modal */}
-      {selectedStock && (
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={detailModalVisible}
-          onRequestClose={() => setDetailModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>{selectedStock.name}</Text>
-            <Text style={styles.modalText}>Symbol: {selectedStock.symbol}</Text>
-            <Text style={styles.modalText}>Quantity: {selectedStock.quantity}</Text>
-            <Text style={styles.modalText}>Purchase Price: ${selectedStock.purchasePrice}</Text>
-            <Text style={styles.modalText}>Current Value: ${(selectedStock.purchasePrice * selectedStock.quantity).toFixed(2)}</Text>
-            <Button title="Close" onPress={() => setDetailModalVisible(false)} />
-          </View>
-        </Modal>
-      )}
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
     padding: 20,
+    backgroundColor: '#fff',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-    backgroundColor: '#ccc',
+  horizontalContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flex: 1,
+  },
+  listContainer: {
+    flex: 1,
+    marginHorizontal: 10,
+  },
+  tabTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  stockItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  stockText: {
+    fontSize: 16,
   },
   modalContainer: {
     flex: 1,
@@ -145,11 +195,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: '#fff',
   },
-  modalText: {
-    fontSize: 16,
-    color: '#fff',
-    marginBottom: 10,
-  },
   input: {
     height: 40,
     borderColor: 'gray',
@@ -159,17 +204,6 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#fff',
   },
-  stockList: {
-    width: '100%',
-    marginTop: 20,
-  },
-  stockItem: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    width: '100%',
-  },
-  stockText: {
-    fontSize: 16,
-  },
 });
+
+export default PortfolioScreen;

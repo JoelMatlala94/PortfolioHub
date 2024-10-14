@@ -1,10 +1,9 @@
 import { Button, StyleSheet } from 'react-native';
-import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 import { Auth, signOut, onAuthStateChanged } from '@firebase/auth';
 import { app, auth } from '@/firebaseConfig';
 import { useEffect, useState } from 'react';
-import { router, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 
 export default function SettingsScreen() {
   const [user, setUser] = useState(null); // State for user
@@ -39,11 +38,15 @@ export default function SettingsScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Settings</Text>
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="app/(tabs)/settings.tsx" />
+      
+      <Text style={styles.infoText}>
+        {user ? `Logged in as: ${user.email}` : 'Not logged in'}
+      </Text>
+
       <Button
         onPress={handleAuthentication}
-        title="Sign Out"
-        color="red"
+        title={user ? "Sign Out" : "Sign In"}
+        color="#FF3D00" // Change color to match your app's theme
       />
     </View>
   );
@@ -54,14 +57,23 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#fff', // Ensure background color matches the app
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
+    marginBottom: 10,
   },
   separator: {
     marginVertical: 30,
     height: 1,
     width: '80%',
+    backgroundColor: '#ccc', // Use a color that matches the rest of the app
+  },
+  infoText: {
+    fontSize: 16,
+    marginBottom: 20,
+    color: '#333', // Darker text for better readability
   },
 });

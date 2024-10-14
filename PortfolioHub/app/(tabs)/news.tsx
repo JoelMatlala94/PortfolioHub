@@ -1,24 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, FlatList, ActivityIndicator, Image, TouchableOpacity, Linking } from 'react-native';
-import axios from 'axios';
-import { Text, View } from '@/components/Themed';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 
-const API_KEY = process.env.STOCK_API_KEY;
-const ALPHA_VANTAGE_NEWS_URL = `https://www.alphavantage.co/query?function=NEWS_SENTIMENT&apikey=${API_KEY}`;
+const API_KEY = '2GSU1KK6959SOM26'; // Replace with your actual API key
 
-export default function NewsScreen() {
-  const [news, setNews] = useState<any[]>([]);
+const NewsTab = () => {
+  const [newsArticles, setNewsArticles] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const response = await axios.get(ALPHA_VANTAGE_NEWS_URL);
-        const fetchedNews = response.data.feed;
-        setNews(fetchedNews || []);
-        setLoading(false);
+        const response = await fetch(`https://www.alphavantage.co/query?function=NEWS_SENTIMENT&apikey=${API_KEY}`);
+        const data = await response.json();
+        setNewsArticles(data.articles || []);
       } catch (error) {
         console.error('Error fetching news:', error);
+      } finally {
         setLoading(false);
       }
     };
@@ -28,96 +25,79 @@ export default function NewsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#ffffff" />
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#007BFF" />
       </View>
     );
   }
 
-  const openLink = (url: string) => {
-    Linking.openURL(url).catch((err) => console.error('Failed to open URL:', err));
-  };
-
-  const renderItem = ({ item }: { item: any }) => (
-    <View style={styles.newsItem}>
-      {item.banner_image && (
-        <Image
-          source={{ uri: item.banner_image }}
-          style={styles.newsImage}
-          resizeMode="cover"
-        />
-      )}
-      <Text style={styles.newsTitle}>{item.title}</Text>
-      <Text style={styles.newsSource}>Source: {item.source}</Text>
-      <Text style={styles.newsSummary}>{item.summary}</Text>
-
-      {/* Make the news title or a button clickable */}
-      <TouchableOpacity onPress={() => openLink(item.url)}>
-        <Text style={styles.newsLink}>Read more</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>News</Text>
-      <FlatList
-        data={news}
-        keyExtractor={(item) => item.url}
-        renderItem={renderItem}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-      />
-    </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Latest News</Text>
+
+      {newsArticles.length > 0 ? (
+        newsArticles.map((article, index) => (
+          <View key={index} style={styles.articleContainer}>
+            <Text style={styles.articleTitle}>{article.title}</Text>
+            <Text style={styles.articleDescription}>{article.description}</Text>
+          </View>
+        ))
+      ) : (
+        <Text style={styles.noArticles}>No news articles available.</Text>
+      )}
+    </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#000', 
+    flexGrow: 1,
     padding: 20,
+    backgroundColor: '#f8f9fa',
+    alignItems: 'flex-start', // Align items to the start
   },
   title: {
-    fontSize: 24,
-    paddingTop: 50,
+    fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff', 
     marginBottom: 20,
+    color: '#343a40',
   },
-  separator: {
-    height: 1,
-    width: '100%',
-    backgroundColor: '#555',
-    marginVertical: 10,
-  },
-  newsItem: {
+  articleContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 15,
     marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    width: '100%', // Make sure articles take full width
   },
-  newsTitle: {
+  articleTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff', 
-    marginBottom: 5,
+    color: '#007BFF',
   },
-  newsSource: {
-    fontStyle: 'italic',
-    color: '#ccc', 
-    marginBottom: 5,
+  articleDescription: {
+    fontSize: 14,
+    marginTop: 5,
+    color: '#495057',
   },
-  newsSummary: {
-    color: '#fff', 
-    marginBottom: 10,
-  },
-  newsLink: {
-    color: '#1E90FF', 
-    textDecorationLine: 'underline',
-    fontWeight: 'bold',
+  noArticles: {
     fontSize: 16,
+    color: '#6c757d',
+    marginTop: 20,
   },
-  newsImage: {
-    width: '100%',
-    height: 200,
-    borderRadius: 10,
-    marginBottom: 10,
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
   },
 });
+
+export default NewsTab;

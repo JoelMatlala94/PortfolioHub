@@ -1,26 +1,98 @@
-import { StyleSheet } from 'react-native';
-import { Text, View } from '@/components/Themed';
-import { useState, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import "@/firebaseConfig";
-import HomePortfolioView from '@/components/HomePortfolioView';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { PieChart } from 'react-native-chart-kit';
 
-const Stack = createNativeStackNavigator();
+const HomePage = () => {
+  // Placeholder data for stocks and cryptocurrencies
+  const [stocks, setStocks] = useState([
+    { symbol: 'AAPL', quantity: 5, price: 150 },
+    { symbol: 'GOOGL', quantity: 2, price: 2800 },
+  ]);
 
-export default function HomeScreen() {
+  const [cryptos, setCryptos] = useState([
+    { symbol: 'BTC', quantity: 0.5, price: 60000 },
+    { symbol: 'ETH', quantity: 3, price: 4000 },
+  ]);
+
+  // Prepare data for the pie chart
+  const chartData = [...stocks, ...cryptos].map(item => ({
+    name: item.symbol,
+    quantity: item.quantity * item.price, // Total value of each asset
+    color: '#' + (Math.random() * 0xFFFFFF << 0).toString(16), // Random color
+    legendFontColor: '#fff',
+    legendFontSize: 15,
+  }));
+
   return (
-    <View style={styles.container}>
-      <HomePortfolioView />
-    </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Portfolio Overview</Text>
+
+      <View style={styles.chartContainer}>
+        <PieChart
+          data={chartData}
+          width={300}
+          height={220}
+          chartConfig={{
+            backgroundColor: '#fff',
+            backgroundGradientFrom: '#fff',
+            backgroundGradientTo: '#fff',
+            color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+            style: {
+              borderRadius: 16,
+            },
+          }}
+          accessor="quantity"
+          style={{ marginVertical: 8, borderRadius: 16 }}
+        />
+      </View>
+
+      <View style={styles.summary}>
+        <Text style={styles.summaryText}>Total Stocks: ${stocks.reduce((total, stock) => total + (stock.quantity * stock.price), 0).toFixed(2)}</Text>
+        <Text style={styles.summaryText}>Total Crypto: ${cryptos.reduce((total, crypto) => total + (crypto.quantity * crypto.price), 0).toFixed(2)}</Text>
+        <Text style={styles.summaryText}>Grand Total: ${(stocks.reduce((total, stock) => total + (stock.quantity * stock.price), 0) + 
+          cryptos.reduce((total, crypto) => total + (crypto.quantity * crypto.price), 0)).toFixed(2)}</Text>
+      </View>
+    </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
+    padding: 20,
+    backgroundColor: '#f8f9fa', // Light background color
     alignItems: 'center',
-    justifyContent: 'flex-start', // Align items to the top
-    paddingTop: 0, // Add some padding to the top
-  }
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#343a40', // Dark text color
+  },
+  chartContainer: {
+    backgroundColor: '#ffffff', // White background for chart
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5, // For Android shadow
+    alignItems: 'center',
+  },
+  summary: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  summaryText: {
+    fontSize: 18,
+    color: '#495057', // Slightly muted text color
+    marginVertical: 5,
+  },
 });
+
+export default HomePage;

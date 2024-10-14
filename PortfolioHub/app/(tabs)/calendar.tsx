@@ -1,44 +1,82 @@
-import { StyleSheet, Modal, Button, TextInput, Alert } from 'react-native';
 import React, { useState } from 'react';
-import { Calendar } from 'react-native-calendars'; 
-import EditScreenInfo from '@/components/EditScreenInfo';
-import { Text, View } from '@/components/Themed';
+import { StyleSheet, Text, View, Modal, TextInput, Button, FlatList, Alert, TouchableOpacity } from 'react-native';
+import { Calendar } from 'react-native-calendars';
 
-export default function CalendarScreen() {
+const CalendarScreen = () => {
+  const [selectedDay, setSelectedDay] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
   const [eventName, setEventName] = useState('');
+  const [events, setEvents] = useState({});
 
-  const handleAddEvent = () => {
-    if (!selectedDate || !eventName) {
-      Alert.alert('Error', 'Please enter an event name and select a date.');
+  const onDayPress = (day) => {
+    setSelectedDay(day.dateString);
+    setModalVisible(true);
+  };
+
+  const addEvent = () => {
+    if (!eventName) {
+      Alert.alert('Error', 'Please enter an event name.');
       return;
     }
 
-    console.log(`Event added: ${eventName}, Date: ${selectedDate}`);
-
+    const newEvents = { ...events };
+    if (!newEvents[selectedDay]) {
+      newEvents[selectedDay] = [];
+    }
+    newEvents[selectedDay].push(eventName);
+    
+    setEvents(newEvents);
     setEventName('');
-    setSelectedDate(undefined);
     setModalVisible(false);
   };
 
-  const onDayPress = (day: { dateString: string }) => {
-    setSelectedDate(day.dateString);
+  const handleRemoveEvent = (event) => {
+    const newEvents = { ...events };
+    newEvents[selectedDay] = newEvents[selectedDay].filter(e => e !== event);
+    setEvents(newEvents);
+  };
+
+  const renderEvents = () => {
+    const eventList = events[selectedDay] || [];
+    return (
+      <FlatList
+        data={eventList}
+        renderItem={({ item }) => (
+          <View style={styles.eventItemContainer}>
+            <Text style={styles.eventItem}>{item}</Text>
+            <TouchableOpacity onPress={() => handleRemoveEvent(item)}>
+              <Text style={styles.removeText}>Remove</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        keyExtractor={(item, index) => index.toString()}
+      />
+    );
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Calendar</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      
-      {/* Calendar Component */}
       <Calendar
         onDayPress={onDayPress}
-        markedDates={{ [selectedDate]: { selected: true, marked: true } }}
+        style={styles.calendar}
+        theme={{
+          todayTextColor: '#00adf5',
+          selectedDayBackgroundColor: '#00adf5',
+          selectedDayTextColor: '#ffffff',
+          dayTextColor: '#2d4150',
+          textDisabledColor: '#d9e1e8',
+          arrowColor: '#00adf5',
+        }}
       />
+      {selectedDay && (
+        <View style={styles.eventsContainer}>
+          <Text style={styles.eventsTitle}>Events on {selectedDay}:</Text>
+          {renderEvents()}
+        </View>
+      )}
 
-      <Button title="Add Event" onPress={() => setModalVisible(true)} color="#007BFF" />
-
+      {/* Modal for adding events */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -53,33 +91,49 @@ export default function CalendarScreen() {
             value={eventName}
             onChangeText={setEventName}
           />
-          <Text style={styles.dateText}>Selected Date: {selectedDate || 'None'}</Text>
-          <Button title="Submit" onPress={handleAddEvent} />
+          <Button title="Add Event" onPress={addEvent} />
           <Button title="Cancel" onPress={() => setModalVisible(false)} color="#FF3D00" />
         </View>
       </Modal>
-
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
     padding: 20,
+    backgroundColor: '#fff',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-    backgroundColor: '#ccc',
+  calendar: {
+    marginTop: 20,
+  },
+  eventsContainer: {
+    marginTop: 20,
+  },
+  eventsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  eventItemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  eventItem: {
+    fontSize: 16,
+  },
+  removeText: {
+    color: 'red',
+    fontWeight: 'bold',
   },
   modalContainer: {
     flex: 1,
@@ -102,8 +156,6 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#fff',
   },
-  dateText: {
-    color: '#fff',
-    marginBottom: 15,
-  },
 });
+
+export default CalendarScreen;
