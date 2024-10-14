@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 
 const HomePage = () => {
-  // Placeholder data for stocks and cryptocurrencies
   const [stocks, setStocks] = useState([
     { symbol: 'AAPL', quantity: 5, price: 150 },
     { symbol: 'GOOGL', quantity: 2, price: 2800 },
@@ -14,11 +13,10 @@ const HomePage = () => {
     { symbol: 'ETH', quantity: 3, price: 4000 },
   ]);
 
-  // Prepare data for the pie chart
   const chartData = [...stocks, ...cryptos].map(item => ({
     name: item.symbol,
-    quantity: item.quantity * item.price, // Total value of each asset
-    color: '#' + (Math.random() * 0xFFFFFF << 0).toString(16), // Random color
+    quantity: item.quantity * item.price, 
+    color: '#' + (Math.random() * 0xFFFFFF << 0).toString(16), 
     legendFontColor: '#fff',
     legendFontSize: 15,
   }));
@@ -61,17 +59,17 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
-    backgroundColor: '#f8f9fa', // Light background color
+    backgroundColor: '#f8f9fa', 
     alignItems: 'center',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: '#343a40', // Dark text color
+    color: '#343a40', 
   },
   chartContainer: {
-    backgroundColor: '#ffffff', // White background for chart
+    backgroundColor: '#ffffff', 
     padding: 20,
     borderRadius: 10,
     shadowColor: '#000',
@@ -81,7 +79,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 5, // For Android shadow
+    elevation: 5, 
     alignItems: 'center',
   },
   summary: {
@@ -90,7 +88,7 @@ const styles = StyleSheet.create({
   },
   summaryText: {
     fontSize: 18,
-    color: '#495057', // Slightly muted text color
+    color: '#495057', 
     marginVertical: 5,
   },
 });

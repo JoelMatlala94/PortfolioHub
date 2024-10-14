@@ -6,14 +6,14 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 
 export default function SettingsScreen() {
-  const [user, setUser] = useState(null); // State for user
+  const [user, setUser] = useState(null); 
   const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       if (!user) {
-        router.replace('/'); // Redirect to home page after signing out
+        router.replace('/'); 
       }
     });
 
@@ -23,7 +23,6 @@ export default function SettingsScreen() {
   const handleAuthentication = async () => {
     try {
       if (user) {
-        // If user is already authenticated, log out
         console.log('User logged out successfully!');
         await signOut(auth);
       } else {
@@ -46,7 +45,7 @@ export default function SettingsScreen() {
       <Button
         onPress={handleAuthentication}
         title={user ? "Sign Out" : "Sign In"}
-        color="#FF3D00" // Change color to match your app's theme
+        color="#FF3D00" 
       />
     </View>
   );
@@ -58,7 +57,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#fff', // Ensure background color matches the app
+    backgroundColor: '#fff', 
   },
   title: {
     fontSize: 24,
@@ -69,11 +68,11 @@ const styles = StyleSheet.create({
     marginVertical: 30,
     height: 1,
     width: '80%',
-    backgroundColor: '#ccc', // Use a color that matches the rest of the app
+    backgroundColor: '#ccc', 
   },
   infoText: {
     fontSize: 16,
     marginBottom: 20,
-    color: '#333', // Darker text for better readability
+    color: '#333', 
   },
 });

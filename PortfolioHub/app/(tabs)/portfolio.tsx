@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Button, Modal, TextInput, Alert, FlatList, TouchableOpacity, View, Text } from 'react-native';
 
-const API_KEY = '2GSU1KK6959SOM26'; // Replace with your actual API key
+const API_KEY = '2GSU1KK6959SOM26'; 
 
 const PortfolioScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);

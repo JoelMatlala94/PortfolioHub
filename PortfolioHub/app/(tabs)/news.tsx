@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    width: '100%', // Make sure articles take full width
+    width: '100%', 
   },
   articleTitle: {
     fontSize: 18,
