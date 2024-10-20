@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Alert, ScrollView, Image } from 'react-native';
+import { 
+    View, Text, TextInput, StyleSheet, TouchableOpacity, 
+    KeyboardAvoidingView, Platform, Alert, ScrollView, Image 
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { sendPasswordResetEmail } from '@firebase/auth';
 import { auth } from '@/firebaseConfig';
 import { ResizeMode, Video } from 'expo-av';
 import { BlurView } from 'expo-blur';
+import { useRouter } from 'expo-router';  // Import useRouter
 
 const ResetPasswordScreen = () => {
     const [email, setEmail] = useState('');
+    const router = useRouter();  // Initialize router
 
     const handlePasswordReset = async () => {
         if (!email) {
@@ -28,6 +33,8 @@ const ResetPasswordScreen = () => {
                 'Password Reset',
                 'If this email is associated with an account, a password reset link has been sent.'
             );
+            // Navigate back to the root screen after sending the reset link
+            router.push('/');  
         } catch (error) {
             console.error(error);
             Alert.alert('Error!', error.message); // Generic error message
@@ -52,7 +59,7 @@ const ResetPasswordScreen = () => {
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 >
                     <ScrollView contentContainerStyle={styles.scrollView}>
-                    <Image source={require('@/assets/images/adaptive-icon.png')} style={styles.image} />
+                        <Image source={require('@/assets/images/adaptive-icon.png')} style={styles.image} />
                         <Text style={styles.title}>Reset Password</Text>
                         <View style={styles.inputWrapper}>
                             <Icon name="mail-outline" size={20} color="#4d4d4d" style={styles.icon} />
@@ -109,11 +116,11 @@ const styles = StyleSheet.create({
         color: '#ccc',
     },
     image: {
-        marginBottom: 60, // Adjust this to position the image slightly under the text
+        marginBottom: 60, 
         borderRadius: 5,
         height: 210,
         width: 210,
-        alignSelf: 'center', // Center the image
+        alignSelf: 'center', 
     },
     inputWrapper: {
         flexDirection: 'row',
