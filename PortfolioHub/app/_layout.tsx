@@ -89,11 +89,11 @@ function RootLayoutNav({ isAuthenticated }) {
             headerStyle: { backgroundColor: Colors.background },
             header: () => (
               <SafeAreaView style={styles.safeArea}>
-                  <BlurView intensity={1} style={styles.headerBlur}>
+                <BlurView intensity={1} style={styles.headerBlur}>
                   <TouchableOpacity onPress={router.back} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={34} color={Colors.light.tabIconDefault} />
                   </TouchableOpacity>
-                  </BlurView>
+                </BlurView>
               </SafeAreaView>
             ),
           }}
@@ -107,11 +107,11 @@ function RootLayoutNav({ isAuthenticated }) {
             headerStyle: { backgroundColor: 'transparent' },
             header: () => (
               <SafeAreaView style={styles.safeArea}>
-                  <BlurView intensity={1} style={styles.headerBlur}>
+                <BlurView intensity={1} style={styles.headerBlur}>
                   <TouchableOpacity onPress={router.back} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={34} color={Colors.light.tabIconDefault} />
                   </TouchableOpacity>
-                  </BlurView>
+                </BlurView>
               </SafeAreaView>
             ),
           }}
@@ -123,11 +123,11 @@ function RootLayoutNav({ isAuthenticated }) {
           headerShown: true,   
           header: () => (
             <SafeAreaView style={styles.safeArea}>
-                <BlurView intensity={1} style={styles.headerBlur}>
+              <BlurView intensity={1} style={styles.headerBlur}>
                 <TouchableOpacity onPress={router.back} style={styles.backButton}>
                   <Ionicons name="arrow-back" size={34} color={Colors.light.tabIconDefault} />
                 </TouchableOpacity>
-                </BlurView>
+              </BlurView>
             </SafeAreaView>
           ),
           }} 
