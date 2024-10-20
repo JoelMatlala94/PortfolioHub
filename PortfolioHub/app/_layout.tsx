@@ -1,6 +1,6 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { TouchableOpacity, SafeAreaView, View, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, SafeAreaView, View, ActivityIndicator, Platform, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { Link, router, Stack } from 'expo-router';
@@ -87,10 +87,14 @@ function RootLayoutNav({ isAuthenticated }) {
             headerBackTitle: '',
             headerShadowVisible: false,
             headerStyle: { backgroundColor: Colors.background },
-            headerLeft: () => (
-              <TouchableOpacity onPress={router.back}>
-                <Ionicons name="arrow-back" size={34} color={Colors.dark} />
-              </TouchableOpacity>
+            header: () => (
+              <SafeAreaView style={styles.safeArea}>
+                <BlurView intensity={1} style={styles.headerBlur}>
+                  <TouchableOpacity onPress={router.back} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={34} color={Colors.light.tabIconDefault} />
+                  </TouchableOpacity>
+                </BlurView>
+              </SafeAreaView>
             ),
           }}
         />
@@ -102,8 +106,8 @@ function RootLayoutNav({ isAuthenticated }) {
             headerShadowVisible: false,
             headerStyle: { backgroundColor: 'transparent' },
             header: () => (
-              <SafeAreaView style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1 }}>
-                <BlurView intensity={0} style={styles.headerBlur}>
+              <SafeAreaView style={styles.safeArea}>
+                <BlurView intensity={1} style={styles.headerBlur}>
                   <TouchableOpacity onPress={router.back} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={34} color={Colors.light.tabIconDefault} />
                   </TouchableOpacity>
@@ -111,6 +115,22 @@ function RootLayoutNav({ isAuthenticated }) {
               </SafeAreaView>
             ),
           }}
+        />
+        <Stack.Screen 
+          name="ResetPasswordScreen" 
+          options={{
+          title: 'Reset Password',
+          headerShown: true,   
+          header: () => (
+            <SafeAreaView style={styles.safeArea}>
+              <BlurView intensity={1} style={styles.headerBlur}>
+                <TouchableOpacity onPress={router.back} style={styles.backButton}>
+                  <Ionicons name="arrow-back" size={34} color={Colors.light.tabIconDefault} />
+                </TouchableOpacity>
+              </BlurView>
+            </SafeAreaView>
+          ),
+          }} 
         />
         <Stack.Screen name="help" options={{ title: 'Help', presentation: 'modal' }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -120,10 +140,12 @@ function RootLayoutNav({ isAuthenticated }) {
 }
 
 const styles = {
+  safeArea: {
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    backgroundColor: 'transparent',
+    position: 'absolute',
+  },
   headerBlur: {
-    paddingVertical: 5,
-    paddingHorizontal: 16,
-    marginTop: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

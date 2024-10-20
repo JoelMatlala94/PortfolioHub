@@ -1,29 +1,50 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { 
+    View, Text, TextInput, StyleSheet, ScrollView, 
+    TouchableOpacity, Image, KeyboardAvoidingView, Platform, 
+    Alert
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from '@firebase/auth';
-import { app, auth } from '@/firebaseConfig';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from '@firebase/auth';
+import { auth } from '@/firebaseConfig';
 import { ResizeMode, Video } from 'expo-av'; 
 import { BlurView } from 'expo-blur'; 
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';  // Use `useRouter` for navigation
 
 const AuthScreen = () => {
+    const router = useRouter();  // Initialize router
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [isLogin, setIsLogin] = useState(true);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-    const handleAuthentication = async () => {
+    const handleLogin = async () => {
+        if (!email) {
+            Alert.alert('No Email Provided', 'Please enter your email address.');
+            return;
+        }
+        // Email validation regex
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            Alert.alert('Invalid Email', 'Please enter a valid email address.');
+            return;
+        }
+        if (!password) {
+            Alert.alert('No Password Provided', 'Please enter your password.');
+            return;
+        }
         try {
-            if (isLogin) {
-                await signInWithEmailAndPassword(auth, email, password);
-                console.log('User signed in!');
-            } else {
-                await createUserWithEmailAndPassword(auth, email, password);
-                console.log('User signed up!');
-            }
+            await signInWithEmailAndPassword(auth, email, password);
+            console.log('User signed in!');
         } catch (error) {
             console.error(error.message);
+            // Check for specific error codes
+            if (error.code === 'auth/wrong-password') {
+                Alert.alert('Login Failed', 'The password is incorrect. Please try again.');
+            } else if (error.code === 'auth/invalid-credential') {
+                Alert.alert('Invalid Credentials', 'The email or password you entered is incorrect. Please check your email and password and try again.');
+            } else {
+                Alert.alert('Login Failed', 'An unknown error occurred. Please try again later.');
+            }
         }
     };
 
@@ -82,14 +103,25 @@ const AuthScreen = () => {
                                 </TouchableOpacity>
                             </View>
                         </View>
-                        <TouchableOpacity style={styles.button} onPress={handleAuthentication}>
-                            <Text style={styles.buttonText}>{isLogin ? 'Login' : 'Sign Up'}</Text>
+                        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+                            <Text style={styles.buttonText}>Login</Text>
                         </TouchableOpacity>
                         <View style={styles.footer}>
-                            <Text onPress={() => setIsLogin(!isLogin)} style={styles.footerText}>
-                                {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Log In'}
-                            </Text>
-                            <Text style={styles.footerText}>Forgot Password?</Text>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Text style={styles.footerText}>Need an Account? </Text>
+                                <Text 
+                                    onPress={() => router.push('/signup')}
+                                    style={styles.linkText}
+                                >
+                                    Sign Up
+                                </Text>
+                            </View>
+                            <Text 
+                                    onPress={() => router.push('/ResetPasswordScreen')}
+                                    style={styles.linkText}
+                                >
+                                    Forgot Password?
+                                </Text>
                         </View>
                     </ScrollView>
                 </KeyboardAvoidingView>
@@ -191,10 +223,11 @@ const styles = StyleSheet.create({
         marginVertical: 8,
         color: '#ccc',
     },
+    linkText: {
+        textDecorationLine: 'underline', 
+        marginVertical: 8,
+        color: '#ccc',
+    },
 });
 
 export default AuthScreen;
-
-function setUser(user: import("@firebase/auth").User | null) {
-    throw new Error('Function not implemented.');
-}
