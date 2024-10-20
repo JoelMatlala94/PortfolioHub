@@ -1,183 +1,200 @@
-import { useEffect, useState } from 'react'
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { defaultStyles } from '@/constants/Styles';
-import { Link, router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, StyleSheet, ScrollView, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged } from '@firebase/auth';
 import { app, auth } from '@/firebaseConfig';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from '@firebase/auth';
-import {
-    View,
-    Text,
-    Button,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-  } from 'react-native';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { ResizeMode, Video } from 'expo-av'; 
+import { BlurView } from 'expo-blur'; 
+import { router } from 'expo-router';
 
-const AuthScreen = ({ email, setEmail, password, setPassword, isLogin, setIsLogin, handleAuthentication }) => {
-    const colorScheme = useColorScheme();
-    return (
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <View style={styles.authContainer}>
-            <Text style={styles.title}>{isLogin ? 'Log In' : 'Sign Up'}</Text>
-            <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Email"
-            autoCapitalize="none"
-            />
-            <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Password"
-                secureTextEntry
-            />
-            <View style={styles.buttonContainer}>
-                <Button title={isLogin ? 'Log In' : 'Sign Up'} onPress={handleAuthentication} color="#3498db" />
-            </View>
-
-            <View style={styles.bottomContainer}>
-                <Text style={styles.toggleText} onPress={() => setIsLogin(!isLogin)}>
-                {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Log In'}
-                </Text>
-            </View>
-        </View>
-        </ThemeProvider>
-    );
-}
-
-const AuthenticatedScreen = ({ user, handleAuthentication }) => {
-    return (
-      <View style={styles.authContainer}>
-        <Text style={styles.title}>Welcome</Text>
-        <Text style={styles.emailText}>{user.email}</Text>
-        <Button title="Logout" onPress={handleAuthentication} color="#e74c3c" />
-      </View>
-    );
-};
-
-const Login = () => {
+const AuthScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [user, setUser] = useState(null); // Track user authentication state
     const [isLogin, setIsLogin] = useState(true);
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-        setUser(user);
-        if (user) {
-            router.replace('(tabs)/home'); // Redirect to home page after sucessful signing up
-        }
-        });
-
-        return () => unsubscribe();
-    }, [auth]);
-
-    
     const handleAuthentication = async () => {
         try {
-        if (user) {
-            // If user is already authenticated, log out
-            console.log('User logged out successfully!');
-            await signOut(auth);
-        } else {
-            // Sign in or sign up
             if (isLogin) {
-                // Sign in
                 await signInWithEmailAndPassword(auth, email, password);
-                console.log('User signed in successfully!');
+                console.log('User signed in!');
             } else {
-                // Sign up
                 await createUserWithEmailAndPassword(auth, email, password);
-                console.log('User created successfully!');
+                console.log('User signed up!');
             }
-        }
         } catch (error) {
-            console.error('Authentication error:', error.message);
+            console.error(error.message);
         }
     };
-        
+
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-        {user ? (
-            // Show user's email if user is authenticated
-            <AuthenticatedScreen user={user} handleAuthentication={handleAuthentication} />
-        ) : (
-            // Show sign-in or sign-up form if user is not authenticated
-            <AuthScreen
-            email={email}
-            setEmail={setEmail}
-            password={password}
-            setPassword={setPassword}
-            isLogin={isLogin}
-            setIsLogin={setIsLogin}
-            handleAuthentication={handleAuthentication}
+        <View style={styles.container}>
+            {/* Video Background */}
+            <Video
+                source={require('@/assets/videos/intro.mp4')}
+                style={styles.video}
+                resizeMode={ResizeMode.COVER}
+                isLooping
+                isMuted
+                shouldPlay
             />
-        )}
-        </ScrollView>
+            {/* Blur View */}
+            <BlurView intensity={50} style={styles.absolute}>
+                <KeyboardAvoidingView
+                    style={styles.innerContainer}
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                >
+                    <ScrollView contentContainerStyle={styles.scrollView}>
+                        <Image source={require('@/assets/images/adaptive-icon.png')} style={styles.image} />
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Email Address</Text>
+                            <View style={styles.inputWrapper}>
+                                <Icon name="mail-outline" size={20} color="#4d4d4d" style={styles.icon} />
+                                <TextInput
+                                    style={styles.input}
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    placeholder="example@domain.com"
+                                    placeholderTextColor="#7a7a7a"
+                                    keyboardType="email-address"
+                                />
+                            </View>
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Password</Text>
+                            <View style={styles.inputWrapper}>
+                                <Icon name="lock-closed-outline" size={20} color="#4d4d4d" style={styles.icon} />
+                                <TextInput
+                                    style={styles.input}
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    placeholder="••••••••••"
+                                    placeholderTextColor="#7a7a7a"
+                                    secureTextEntry={!isPasswordVisible}
+                                />
+                                <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
+                                    <Icon
+                                        name={isPasswordVisible ? "eye-off-outline" : "eye-outline"}
+                                        size={20}
+                                        color="#4d4d4d"
+                                        style={styles.iconRight}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        <TouchableOpacity style={styles.button} onPress={handleAuthentication}>
+                            <Text style={styles.buttonText}>{isLogin ? 'Login' : 'Sign Up'}</Text>
+                        </TouchableOpacity>
+                        <View style={styles.footer}>
+                            <Text onPress={() => setIsLogin(!isLogin)} style={styles.footerText}>
+                                {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Log In'}
+                            </Text>
+                            <Text style={styles.footerText}>Forgot Password?</Text>
+                        </View>
+                    </ScrollView>
+                </KeyboardAvoidingView>
+            </BlurView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
-    inputContainer: {
-        marginVertical: 40,
-        flexDirection: 'row',
-    },
-    enabled: {
-        backgroundColor: Colors.primary,
-    },
-    disabled: {
-        backgroundColor: Colors.primaryMuted,
-    },
     container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: Colors.background,
+        flex: 1,
+        justifyContent: 'space-between',
     },
-    authContainer: {
-    width: '80%',
-    maxWidth: 400,
-    backgroundColor: '#3C3C4399',
-    padding: 16,
-    borderRadius: 8,
-    elevation: 3,
+    video: {
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
     },
-    title: {
-    fontSize: 24,
-    marginBottom: 16,
-    textAlign: 'center',
+    absolute: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    innerContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    scrollView: {
+        flexGrow: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 16,
+        width: '100%',
+    },
+    image: {
+        marginBottom: 60,
+        borderRadius: 5,
+        height: 210,
+        width: 210,
+    },
+    inputContainer: {
+        width: '100%', 
+        paddingHorizontal: 24,
+        marginVertical: 12, 
+    },
+    label: {
+        fontSize: 18,
+        marginBottom: 8,
+        color: '#ccc',
+    },
+    inputWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        borderRadius: 25,
+        paddingHorizontal: 16,
+        height: 55,
+        shadowColor: '#e6e9f9',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.8,
+        shadowRadius: 4,
+        elevation: 5,
+        width: '100%',
     },
     input: {
-    backgroundColor: Colors.dark,
-    padding: 20,
-    borderRadius: 16,
-    fontSize: 20,
-    marginRight: 10,
-    color: 'white',
+        flex: 1,
+        fontSize: 16,
+        paddingVertical: 8,
+        marginLeft: 10,
+        width: '100%',
     },
-    buttonContainer: {
-    marginBottom: 16,
+    icon: {
+        marginTop: 2,
     },
-    toggleText: {
-    color: '#3498db',
-    textAlign: 'center',
+    iconRight: {
+        marginLeft: 10,
+        marginTop: 2,
     },
-    bottomContainer: {
-    marginTop: 20,
+    button: {
+        backgroundColor: '#2545bd',
+        borderRadius: 30,
+        paddingVertical: 15,
+        paddingHorizontal: 40,
+        marginTop: 20,
+        width: '90%',
+        alignSelf: 'center',
     },
-    emailText: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginBottom: 20,
+    buttonText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 18,
+        textAlign: 'center',
+    },
+    footer: {
+        alignItems: 'center',
+        marginTop: 25,
+    },
+    footerText: {
+        marginVertical: 8,
+        color: '#ccc',
     },
 });
 
-export default Login;
+export default AuthScreen;
+
+function setUser(user: import("@firebase/auth").User | null) {
+    throw new Error('Function not implemented.');
+}

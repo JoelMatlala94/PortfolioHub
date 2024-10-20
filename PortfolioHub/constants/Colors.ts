@@ -2,7 +2,7 @@ const tintColorLight = '#2f95dc';
 const tintColorDark = '#fff';
 
 export default {
-  primary: '#3D38ED',
+  primary: '#2545bd',
   primaryMuted: '#C9C8FA',
   background: '#F5F5F5',
   gray: '#626D77',

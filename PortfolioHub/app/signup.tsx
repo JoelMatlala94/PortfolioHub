@@ -67,7 +67,7 @@ const Signup = ({ navigation }) => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
         setUser(user);
         if (user) {
-            router.replace('(tabs)/home'); // Redirect to home page after signing in
+            router.replace('(tabs)/home'); // Redirect to home page after sucessful signing up
         }
         });
 
