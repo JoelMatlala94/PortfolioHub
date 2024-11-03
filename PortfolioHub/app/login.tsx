@@ -6,10 +6,11 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from '@firebase/auth';
-import { auth } from '@/firebaseConfig';
+import { auth, firestore } from '@/firebaseConfig';
 import { ResizeMode, Video } from 'expo-av'; 
 import { BlurView } from 'expo-blur'; 
 import { useRouter } from 'expo-router';  // Use `useRouter` for navigation
+import { doc, updateDoc } from 'firebase/firestore';
 
 const AuthScreen = () => {
     const router = useRouter();  // Initialize router
@@ -33,7 +34,19 @@ const AuthScreen = () => {
             return;
         }
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            // Check if email is verified 
+            if (user.emailVerified) { 
+                // Update Firestore with the email verified status 
+                await updateDoc(doc(firestore, 'users', user.uid), {
+                     emailVerified: true, 
+                }); 
+                console.log('Email verified and Firestore updated.'); 
+            } else { 
+                Alert.alert('Email Not Verified', 'Please verify your email before logging in.'); 
+                await auth.signOut(); 
+            }
             console.log('User signed in!');
         } catch (error) {
             console.error(error.message);

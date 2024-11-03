@@ -30,7 +30,7 @@ const Page = () => {
           style={[defaultStyles.pillButton, { flex: 1, backgroundColor: '#141518' }]}
           asChild>
           <TouchableOpacity>
-            <Text style={{ color: 'white', fontSize: 22, fontWeight: '500' }}>Log in</Text>
+            <Text style={{ color: 'white', fontSize: 22, fontWeight: '500' }}>Login</Text>
           </TouchableOpacity>
         </Link>
         <Link
@@ -38,7 +38,7 @@ const Page = () => {
           style={[defaultStyles.pillButton, { flex: 1, backgroundColor: '#fff' }]}
           asChild>
           <TouchableOpacity>
-            <Text style={{ fontSize: 22, fontWeight: '500' }}>Sign up</Text>
+            <Text style={{ fontSize: 22, fontWeight: '500' }}>Sign Up</Text>
           </TouchableOpacity>
         </Link>
       </View>
