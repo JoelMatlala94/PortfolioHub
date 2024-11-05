@@ -43,6 +43,24 @@ const PortfolioScreen: React.FC = () => {
     }
   };
 
+  const calculateAverageCost = () => {
+    if (stocks.length === 0) return 0;
+    
+    const totalCost = stocks.reduce((acc, stock) => acc + (stock.purchasePrice * stock.quantity), 0);
+    const totalQuantity = stocks.reduce((acc, stock) => acc + stock.quantity, 0);
+
+    return totalQuantity > 0 ? totalCost / totalQuantity : 0;
+  };
+
+  const calculateEstimatedGains = () => {
+    if (stocks.length === 0) return 0;
+
+    const currentTotalValue = stocks.reduce((acc, stock) => acc + (stock.purchasePrice * stock.quantity), 0);
+    const averageCost = calculateAverageCost();
+
+    return currentTotalValue - (averageCost * stocks.reduce((acc, stock) => acc + stock.quantity, 0));
+  };
+
   const handleAddStock = async () => {
     if (!stockSymbol || !stockQuantity) {
       Alert.alert('Error', 'Please enter both a stock symbol and a quantity.');
@@ -75,7 +93,6 @@ const PortfolioScreen: React.FC = () => {
       Alert.alert('Error', 'Failed to save the stock to Firestore.');
     }
 
-   
     setStockSymbol('');
     setStockQuantity('');
     setIsAddingStock(false); 
@@ -89,8 +106,14 @@ const PortfolioScreen: React.FC = () => {
     }
 
     try {
+      // Logging the stockId to verify it before deletion
+      console.log('Attempting to remove stock with ID:', stockId);
+
+      // Ensuring the document reference is correct
       await deleteDoc(doc(firestore, 'stocks', stockId));
-      setStocks(stocks.filter(stock => stock.id !== stockId)); 
+
+      // Remove the stock from local state
+      setStocks(stocks.filter(stock => stock.id !== stockId));
       Alert.alert('Success', 'Stock removed successfully!');
     } catch (error) {
       console.error('Error removing stock:', error);
@@ -110,7 +133,7 @@ const PortfolioScreen: React.FC = () => {
       const q = query(collection(firestore, 'stocks'), where('userId', '==', user.uid));
       const querySnapshot = await getDocs(q);
       const stocksList = querySnapshot.docs.map((doc) => ({
-        id: doc.id, 
+        id: doc.id,  // Ensure the document ID is part of the stock object
         ...doc.data() as Stock
       }));
       setStocks(stocksList);  
@@ -135,7 +158,7 @@ const PortfolioScreen: React.FC = () => {
   const renderStockItem = ({ item }: { item: Stock }) => (
     <TouchableOpacity style={styles.stockItem}>
       <Text style={styles.stockText}>
-        {item.symbol} - {item.name} - Quantity: {item.quantity} - Price: ${item.purchasePrice.toFixed(2)}
+        {item.symbol} - {item.name} - Quantity: {item.quantity} - Purchase Price: ${item.purchasePrice.toFixed(2)}
       </Text>
       <Button title="Remove" onPress={() => handleRemoveStock(item.id)} color="red" />
     </TouchableOpacity>
@@ -147,26 +170,28 @@ const PortfolioScreen: React.FC = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <Text style={styles.title}>Portfolio</Text>
+
+      <View style={styles.summary}>
+        <Text style={styles.summaryText}>Average Cost: ${calculateAverageCost().toFixed(2)}</Text>
+        <Text style={styles.summaryText}>Estimated Gains: ${calculateEstimatedGains().toFixed(2)}</Text>
+      </View>
+
       <FlatList
         data={stocks}
         renderItem={renderStockItem}
         keyExtractor={(item) => item.id}
       />
 
-      
       {!isAddingStock ? (
         <Button title="Add Stock" onPress={() => setIsAddingStock(true)} />
       ) : (
         <View>
-          
           <TextInput
             style={styles.input}
             placeholder="Enter stock symbol (e.g. AAPL)"
             value={stockSymbol}
             onChangeText={setStockSymbol}
           />
-
-         
           <TextInput
             style={styles.input}
             placeholder="Enter quantity"
@@ -174,18 +199,13 @@ const PortfolioScreen: React.FC = () => {
             onChangeText={setStockQuantity}
             keyboardType="numeric"
           />
-
-          
           <Button title="Submit Stock" onPress={handleAddStock} />
-
-         
           <Button title="Cancel" onPress={() => setIsAddingStock(false)} color="red" />
         </View>
       )}
     </KeyboardAvoidingView>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -197,6 +217,16 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
+  },
+  summary: {
+    marginBottom: 20,
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
+  },
+  summaryText: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   stockItem: {
     padding: 15,

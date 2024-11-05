@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Alert, Dimensions } from 'react-native';
 import { PieChart } from 'react-native-chart-kit';
 import { firestore, auth } from '@/firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';  
+
+const screenWidth = Dimensions.get('window').width; 
 
 const HomePage = () => {
   const [stocks, setStocks] = useState([]);
@@ -53,8 +55,8 @@ const HomePage = () => {
       <View style={styles.chartContainer}>
         <PieChart
           data={chartData}
-          width={300}
-          height={220}
+          width={screenWidth * 0.85} 
+          height={220} 
           chartConfig={{
             backgroundColor: '#fff',
             backgroundGradientFrom: '#fff',
