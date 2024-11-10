@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Button, Alert, FlatList, TouchableOpacity, View, Text, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, Button, Alert, FlatList, TouchableOpacity, View, Text, TextInput, KeyboardAvoidingView, Platform, Dimensions, ScrollView } from 'react-native';
+import { LineChart } from 'react-native-chart-kit';
 import { firestore, auth } from '@/firebaseConfig'; 
-import { collection, addDoc, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore'; 
+import { collection, addDoc, query, where, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore'; 
 import { onAuthStateChanged } from 'firebase/auth'; 
 
 interface Stock {
@@ -10,12 +11,15 @@ interface Stock {
   name: string;
   quantity: number;
   purchasePrice: number;
+  currentPrice?: number;
 }
 
 const API_KEY = '663038ae8502426f91fbfdc16026e648';
+const screenWidth = Dimensions.get('window').width;
 
 const PortfolioScreen: React.FC = () => {
   const [stocks, setStocks] = useState<Stock[]>([]);
+  const [showChart, setShowChart] = useState(false);  
   const [stockSymbol, setStockSymbol] = useState(''); 
   const [stockQuantity, setStockQuantity] = useState(''); 
   const [isAddingStock, setIsAddingStock] = useState(false); 
@@ -43,23 +47,64 @@ const PortfolioScreen: React.FC = () => {
     }
   };
 
-  const calculateAverageCost = () => {
-    if (stocks.length === 0) return 0;
-    
-    const totalCost = stocks.reduce((acc, stock) => acc + (stock.purchasePrice * stock.quantity), 0);
-    const totalQuantity = stocks.reduce((acc, stock) => acc + stock.quantity, 0);
-
-    return totalQuantity > 0 ? totalCost / totalQuantity : 0;
+  const fetchLatestPrice = async (symbol: string): Promise<number | null> => {
+    try {
+      const response = await fetch(`https://api.twelvedata.com/quote?symbol=${symbol}&apikey=${API_KEY}`);
+      const data = await response.json();
+      return data.close ? parseFloat(data.close) : null;
+    } catch (error) {
+      console.error('Error fetching latest price:', error);
+      return null;
+    }
   };
 
-  const calculateEstimatedGains = () => {
-    if (stocks.length === 0) return 0;
+  const fetchStocks = async () => {
+    const user = auth.currentUser;
 
-    const currentTotalValue = stocks.reduce((acc, stock) => acc + (stock.purchasePrice * stock.quantity), 0);
-    const averageCost = calculateAverageCost();
+    if (!user) {
+      Alert.alert('Error', 'No user is logged in.');
+      return;
+    }
 
-    return currentTotalValue - (averageCost * stocks.reduce((acc, stock) => acc + stock.quantity, 0));
+    try {
+      const q = query(collection(firestore, 'stocks'), where('userId', '==', user.uid));
+      const querySnapshot = await getDocs(q);
+      const stocksList = await Promise.all(
+        querySnapshot.docs.map(async (doc) => {
+          const stockData = doc.data() as Stock;
+          const latestPrice = await fetchLatestPrice(stockData.symbol);
+          if (latestPrice !== null) {
+            await updateDoc(doc.ref, { currentPrice: latestPrice });
+          }
+          return { id: doc.id, ...stockData, currentPrice: latestPrice };
+        })
+      );
+      setStocks(stocksList);
+    } catch (error) {
+      console.error('Error fetching stocks from Firestore:', error);
+      Alert.alert('Error', 'Failed to fetch stocks from Firestore.');
+    }
   };
+
+  const calculateTotalPurchaseValue = () => {
+    return stocks.reduce((total, stock) => total + (stock.purchasePrice * stock.quantity), 0);
+  };
+
+  const calculateTotalCurrentValue = () => {
+    return stocks.reduce((total, stock) => total + ((stock.currentPrice || stock.purchasePrice) * stock.quantity), 0);
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchStocks();
+      } else {
+        setStocks([]);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleAddStock = async () => {
     if (!stockSymbol || !stockQuantity) {
@@ -106,14 +151,8 @@ const PortfolioScreen: React.FC = () => {
     }
 
     try {
-      // Logging the stockId to verify it before deletion
-      console.log('Attempting to remove stock with ID:', stockId);
-
-      // Ensuring the document reference is correct
       await deleteDoc(doc(firestore, 'stocks', stockId));
-
-      // Remove the stock from local state
-      setStocks(stocks.filter(stock => stock.id !== stockId));
+      setStocks(stocks.filter(stock => stock.id !== stockId)); 
       Alert.alert('Success', 'Stock removed successfully!');
     } catch (error) {
       console.error('Error removing stock:', error);
@@ -121,66 +160,70 @@ const PortfolioScreen: React.FC = () => {
     }
   };
 
-  const fetchStocks = async () => {
-    const user = auth.currentUser;
-
-    if (!user) {
-      Alert.alert('Error', 'No user is logged in.');
-      return;
-    }
-
-    try {
-      const q = query(collection(firestore, 'stocks'), where('userId', '==', user.uid));
-      const querySnapshot = await getDocs(q);
-      const stocksList = querySnapshot.docs.map((doc) => ({
-        id: doc.id,  // Ensure the document ID is part of the stock object
-        ...doc.data() as Stock
-      }));
-      setStocks(stocksList);  
-    } catch (error) {
-      console.error('Error fetching stocks from Firestore:', error);
-      Alert.alert('Error', 'Failed to fetch stocks from Firestore.');
-    }
-  };
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        fetchStocks();
-      } else {
-        setStocks([]);
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   const renderStockItem = ({ item }: { item: Stock }) => (
-    <TouchableOpacity style={styles.stockItem}>
-      <Text style={styles.stockText}>
-        {item.symbol} - {item.name} - Quantity: {item.quantity} - Purchase Price: ${item.purchasePrice.toFixed(2)}
-      </Text>
+    <View style={styles.stockItem}>
+      <View style={styles.stockInfo}>
+        <Text style={styles.stockSymbol}>{item.symbol}</Text>
+        <Text style={styles.stockName}>{item.name}</Text>
+        <Text style={styles.stockDetails}>Quantity: {item.quantity}</Text>
+        <Text style={styles.stockDetails}>Purchase Price: ${item.purchasePrice.toFixed(2)}</Text>
+        <Text style={styles.stockDetails}>Current Price: ${item.currentPrice?.toFixed(2) || 'N/A'}</Text>
+      </View>
       <Button title="Remove" onPress={() => handleRemoveStock(item.id)} color="red" />
-    </TouchableOpacity>
+    </View>
   );
 
+  
+  const chartData = {
+    labels: ['Initial', 'Current'],
+    datasets: [
+      {
+        data: [calculateTotalPurchaseValue(), calculateTotalCurrentValue()],
+        color: () => `rgba(0, 255, 0, 0.7)`, 
+        strokeWidth: 2,
+      },
+    ],
+    legend: ['Total Portfolio Value'],
+  };
+
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Text style={styles.title}>Portfolio</Text>
 
       <View style={styles.summary}>
-        <Text style={styles.summaryText}>Average Cost: ${calculateAverageCost().toFixed(2)}</Text>
-        <Text style={styles.summaryText}>Estimated Gains: ${calculateEstimatedGains().toFixed(2)}</Text>
+        <Text style={styles.summaryText}>Total Cost: ${calculateTotalPurchaseValue().toFixed(2)}</Text>
+        <Text style={styles.summaryText}>Estimated Gains: ${(calculateTotalCurrentValue() - calculateTotalPurchaseValue()).toFixed(2)}</Text>
       </View>
 
-      <FlatList
-        data={stocks}
-        renderItem={renderStockItem}
-        keyExtractor={(item) => item.id}
-      />
+      {showChart ? (
+        <ScrollView horizontal>
+          <LineChart
+            data={chartData}
+            width={screenWidth * 0.8} 
+            height={220}
+            chartConfig={{
+              backgroundColor: '#000',
+              backgroundGradientFrom: '#1E2923',
+              backgroundGradientTo: '#08130D',
+              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+              strokeWidth: 2,
+              style: { borderRadius: 16 },
+            }}
+            style={{ marginVertical: 8, borderRadius: 16 }}
+          />
+          <Button title="Go Back" onPress={() => setShowChart(false)} />
+        </ScrollView>
+      ) : (
+        <>
+          <FlatList
+            data={stocks}
+            renderItem={renderStockItem}
+            keyExtractor={(item) => item.id}
+          />
+          <Button title="View Total Portfolio Performance Chart" onPress={() => setShowChart(true)} />
+        </>
+      )}
 
       {!isAddingStock ? (
         <Button title="Add Stock" onPress={() => setIsAddingStock(true)} />
@@ -229,15 +272,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   stockItem: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
   },
-  stockText: {
+  stockInfo: {
+    flex: 1,
+  },
+  stockSymbol: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  stockName: {
     fontSize: 16,
+    color: '#555',
+  },
+  stockDetails: {
+    fontSize: 14,
+    color: '#333',
   },
   input: {
     height: 40,
