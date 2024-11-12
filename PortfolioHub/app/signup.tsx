@@ -32,8 +32,8 @@ const AuthScreen = () => {
 
   const handleSignup = async () => {
     if (!displayName) {
-      Alert.alert('No Display Name Provided', 'Please enter a display name.');
-      return;
+        Alert.alert('No Display Name Provided', 'Please enter a display name.');
+        return;
     }
     if (!email) {
         Alert.alert('No Email Provided', 'Please enter your email address.');
@@ -52,20 +52,16 @@ const AuthScreen = () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-      // Update profile with display name 
-      await updateProfile(user, { displayName });
-      // Store user info in Firestore 
-      await setDoc(doc(firestore, 'users', user.uid), { 
+      await updateProfile(user, { displayName }); // Update profile with display name 
+      await setDoc(doc(firestore, 'users', user.uid), {  // Store user info in Firestore 
         displayName, 
         email: user.email, 
         country,
         emailVerified: false, 
       });
-      // Send email verification 
-      await sendEmailVerification(user);
+      await sendEmailVerification(user); // Send email verification 
       console.log('Verification email sent!');
-      // Sign out the user immediately after sign-up 
-      await auth.signOut();
+      await auth.signOut(); // Sign out the user immediately after sign-up 
       Alert.alert('Sign Up Successful', 'Please verify your email before logging in.');
     } catch (error) {
         console.error(error.message);
@@ -324,6 +320,7 @@ const pickerSelectStyles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 25,
     shadowOpacity: 0,
+    height: 60, // Increase the height to prevent text cut-off for android
   },
 });
 

@@ -4,6 +4,7 @@ import { PieChart } from 'react-native-chart-kit';
 import { firestore, auth } from '@/firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';  
+import HomePortfolioView from '@/components/HomePortfolioView';
 
 const screenWidth = Dimensions.get('window').width; 
 

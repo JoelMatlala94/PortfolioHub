@@ -15,7 +15,7 @@ const NewsTab = () => {
         );
         const data = await response.json();
 
-        console.log('API response:', data);
+        //console.log('API response:', data);
 
         if (data.articles && Array.isArray(data.articles)) {
           setNewsArticles(data.articles);
