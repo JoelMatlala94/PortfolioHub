@@ -1,146 +1,115 @@
-import React, { useState } from 'react';
-import { 
-    View, Text, TextInput, StyleSheet, ScrollView, 
-    TouchableOpacity, Image, KeyboardAvoidingView, Platform, 
-    Alert
+import React from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from '@firebase/auth';
-import { auth, firestore } from '@/firebaseConfig';
-import { ResizeMode, Video } from 'expo-av'; 
-import { BlurView } from 'expo-blur'; 
-import { useRouter } from 'expo-router';  // Use `useRouter` for navigation
-import { doc, updateDoc } from 'firebase/firestore';
+import { ResizeMode, Video } from 'expo-av';
+import { BlurView } from 'expo-blur';
+import { useRouter } from 'expo-router';
+import useLoginViewModel from '@/viewmodels/LoginViewModel';
 
-const AuthScreen = () => {
-    const router = useRouter();  // Initialize router
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+const LoginScreen = () => {
+  const router = useRouter();
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    isPasswordVisible,
+    togglePasswordVisibility,
+    isLoading,
+    handleLogin,
+  } = useLoginViewModel();
 
-    const handleLogin = async () => {
-        if (!email) {
-            Alert.alert('No Email Provided', 'Please enter your email address.');
-            return;
-        }
-        // Email validation regex
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailPattern.test(email)) {
-            Alert.alert('Invalid Email', 'Please enter a valid email address.');
-            return;
-        }
-        if (!password) {
-            Alert.alert('No Password Provided', 'Please enter your password.');
-            return;
-        }
-        try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            // Check if email is verified 
-            if (user.emailVerified) { 
-                // Update Firestore with the email verified status 
-                await updateDoc(doc(firestore, 'users', user.uid), {
-                     emailVerified: true, 
-                }); 
-                console.log('Email verified and Firestore updated.'); 
-            } else { 
-                Alert.alert('Email Not Verified', 'Please verify your email before logging in.'); 
-                await auth.signOut(); 
-            }
-            console.log('User signed in!');
-        } catch (error) {
-            console.error(error.message);
-            // Check for specific error codes
-            if (error.code === 'auth/wrong-password') {
-                Alert.alert('Login Failed', 'The password is incorrect. Please try again.');
-            } else if (error.code === 'auth/invalid-credential') {
-                Alert.alert('Invalid Credentials', 'The email or password you entered is incorrect. Please check your email and password and try again.');
-            } else {
-                Alert.alert('Login Failed', 'An unknown error occurred. Please try again later.');
-            }
-        }
-    };
-
-    return (
-        <View style={styles.container}>
-            {/* Video Background */}
-            <Video
-                source={require('@/assets/videos/intro.mp4')}
-                style={styles.video}
-                resizeMode={ResizeMode.COVER}
-                isLooping
-                isMuted
-                shouldPlay
-            />
-            {/* Blur View */}
-            <BlurView intensity={50} style={styles.absolute}>
-                <KeyboardAvoidingView
-                    style={styles.innerContainer}
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                >
-                    <ScrollView contentContainerStyle={styles.scrollView}>
-                        <Image source={require('@/assets/images/adaptive-icon.png')} style={styles.image} />
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Email Address</Text>
-                            <View style={styles.inputWrapper}>
-                                <Icon name="mail-outline" size={20} color="#4d4d4d" style={styles.icon} />
-                                <TextInput
-                                    style={styles.input}
-                                    value={email}
-                                    onChangeText={setEmail}
-                                    placeholder="example@domain.com"
-                                    placeholderTextColor="#7a7a7a"
-                                    keyboardType="email-address"
-                                />
-                            </View>
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Password</Text>
-                            <View style={styles.inputWrapper}>
-                                <Icon name="lock-closed-outline" size={20} color="#4d4d4d" style={styles.icon} />
-                                <TextInput
-                                    style={styles.input}
-                                    value={password}
-                                    onChangeText={setPassword}
-                                    placeholder="••••••••••"
-                                    placeholderTextColor="#7a7a7a"
-                                    secureTextEntry={!isPasswordVisible}
-                                />
-                                <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
-                                    <Icon
-                                        name={isPasswordVisible ? "eye-off-outline" : "eye-outline"}
-                                        size={20}
-                                        color="#4d4d4d"
-                                        style={styles.iconRight}
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                            <Text style={styles.buttonText}>Login</Text>
-                        </TouchableOpacity>
-                        <View style={styles.footer}>
-                            <View style={{ flexDirection: 'row' }}>
-                                <Text style={styles.footerText}>Need an Account? </Text>
-                                <Text 
-                                    onPress={() => router.push('/signup')}
-                                    style={styles.linkText}
-                                >
-                                    Sign Up
-                                </Text>
-                            </View>
-                            <Text 
-                                    onPress={() => router.push('/ResetPasswordScreen')}
-                                    style={styles.linkText}
-                                >
-                                    Forgot Password?
-                                </Text>
-                        </View>
-                    </ScrollView>
-                </KeyboardAvoidingView>
-            </BlurView>
-        </View>
-    );
+  return (
+    <View style={styles.container}>
+      <Video
+        source={require('@/assets/videos/intro.mp4')}
+        style={styles.video}
+        resizeMode={ResizeMode.COVER}
+        isLooping
+        isMuted
+        shouldPlay
+      />
+      <BlurView intensity={50} style={styles.absolute}>
+        <KeyboardAvoidingView
+          style={styles.innerContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <ScrollView contentContainerStyle={styles.scrollView}>
+            <Image source={require('@/assets/images/adaptive-icon.png')} style={styles.image} />
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Email Address</Text>
+              <View style={styles.inputWrapper}>
+                <Icon name="mail-outline" size={20} color="#4d4d4d" style={styles.icon} />
+                <TextInput
+                  style={styles.input}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="example@domain.com"
+                  placeholderTextColor="#7a7a7a"
+                  keyboardType="email-address"
+                />
+              </View>
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Password</Text>
+              <View style={styles.inputWrapper}>
+                <Icon name="lock-closed-outline" size={20} color="#4d4d4d" style={styles.icon} />
+                <TextInput
+                  style={styles.input}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="••••••••••"
+                  placeholderTextColor="#7a7a7a"
+                  secureTextEntry={!isPasswordVisible}
+                />
+                <TouchableOpacity onPress={togglePasswordVisibility}>
+                  <Icon
+                    name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color="#4d4d4d"
+                    style={styles.iconRight}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleLogin(router)}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Login</Text>
+              )}
+            </TouchableOpacity>
+            <View style={styles.footer}>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={styles.footerText}>Need an Account? </Text>
+                <Text onPress={() => router.push('/signup')} style={styles.linkText}>
+                  Sign Up
+                </Text>
+              </View>
+              <Text onPress={() => router.push('/ResetPasswordScreen')} style={styles.linkText}>
+                Forgot Password?
+              </Text>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </BlurView>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -243,4 +212,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default AuthScreen;
+export default LoginScreen;

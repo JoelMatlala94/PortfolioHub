@@ -1,199 +1,140 @@
-import { useEffect, useState } from 'react';
-import Colors from '@/constants/Colors';
-import { defaultStyles } from '@/constants/Styles';
-import { Link, router, useRouter } from 'expo-router';
-import { app, auth, firestore } from '@/firebaseConfig';
-import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendEmailVerification } from '@firebase/auth';
-import {
-    View,
-    Text,
-    Image,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Alert,
-} from 'react-native';
+import { View, Text, Image, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { ResizeMode, Video } from 'expo-av';
 import Icon from 'react-native-vector-icons/Ionicons';
 import RNPickerSelect from 'react-native-picker-select';
-import { doc, setDoc } from 'firebase/firestore';
+import useSignUpViewModel from '@/viewmodels/SignUpViewModel';
+import { useRouter } from 'expo-router';
 
-const AuthScreen = () => {
+const SignupScreen = () => {
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    displayName,
+    setDisplayName,
+    country,
+    setCountry,
+    isPasswordVisible,
+    togglePasswordVisibility,
+    handleSignup,
+  } = useSignUpViewModel();
+
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [country, setCountry] = useState('USA');
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-
-  const handleSignup = async () => {
-    if (!displayName) {
-        Alert.alert('No Display Name Provided', 'Please enter a display name.');
-        return;
-    }
-    if (!email) {
-        Alert.alert('No Email Provided', 'Please enter your email address.');
-        return;
-    }
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-        Alert.alert('Invalid Email', 'Please enter a valid email address.');
-        return;
-    }
-    if (!password) {
-        Alert.alert('No Password Provided', 'Please enter your password.');
-        return;
-    }
-
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      await updateProfile(user, { displayName }); // Update profile with display name 
-      await setDoc(doc(firestore, 'users', user.uid), {  // Store user info in Firestore 
-        displayName, 
-        email: user.email, 
-        country,
-        emailVerified: false, 
-      });
-      await sendEmailVerification(user); // Send email verification 
-      console.log('Verification email sent!');
-      await auth.signOut(); // Sign out the user immediately after sign-up 
-      Alert.alert('Sign Up Successful', 'Please verify your email before logging in.');
-    } catch (error) {
-        console.error(error.message);
-        if (error.code === 'auth/wrong-password') {
-            Alert.alert('Signup Failed', 'The password is invalid. Please try again.');
-        } else if (error.code === 'auth/invalid-credential') {
-            Alert.alert('Invalid Credentials', 'The email or password you entered is invalid. Please check your email and password and try again.');
-        } else if (error.code === 'auth/weak-password') {
-          Alert.alert('Invalid Password', 'Your password should be at least 6 characters long!');
-        }
-        else {
-            Alert.alert('Login Failed', 'An unknown error occurred. Please try again later.');
-        }
-    }
-  };
 
   return (
     <View style={styles.container}>
       <Video
-            source={require('@/assets/videos/intro.mp4')}
-            style={styles.video}
-            resizeMode={ResizeMode.COVER}
-            isLooping
-            isMuted
-            shouldPlay
-        />
-        <BlurView intensity={50} style={styles.absolute}>
-            <KeyboardAvoidingView
-                style={styles.innerContainer}
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            >
-                <ScrollView contentContainerStyle={styles.scrollView}>
-                    <Image source={require('@/assets/images/adaptive-icon.png')} style={styles.image} />
+        source={require('@/assets/videos/intro.mp4')}
+        style={styles.video}
+        resizeMode={ResizeMode.COVER}
+        isLooping
+        isMuted
+        shouldPlay
+      />
+      <BlurView intensity={50} style={styles.absolute}>
+        <KeyboardAvoidingView
+          style={styles.innerContainer}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <ScrollView contentContainerStyle={styles.scrollView}>
+            <Image source={require('@/assets/images/adaptive-icon.png')} style={styles.image} />
 
-                    {/* Display Name Field */}
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Display Name</Text>
-                        <View style={styles.inputWrapper}>
-                            <Icon name="person-outline" size={20} color="#4d4d4d" style={styles.icon} />
-                            <TextInput
-                                style={styles.input}
-                                value={displayName}
-                                onChangeText={setDisplayName}
-                                placeholder="Display Name"
-                                placeholderTextColor="#7a7a7a"
-                            />
-                        </View>
-                    </View>
-                    
-                    {/* Email Field */}
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Email Address</Text>
-                        <View style={styles.inputWrapper}>
-                            <Icon name="mail-outline" size={20} color="#4d4d4d" style={styles.icon} />
-                            <TextInput
-                                style={styles.input}
-                                value={email}
-                                onChangeText={setEmail}
-                                placeholder="example@domain.com"
-                                placeholderTextColor="#7a7a7a"
-                                keyboardType="email-address"
-                            />
-                        </View>
-                    </View>
-                    
-                    {/* Password Field */}
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Password</Text>
-                        <View style={styles.inputWrapper}>
-                            <Icon name="lock-closed-outline" size={20} color="#4d4d4d" style={styles.icon} />
-                            <TextInput
-                                style={styles.input}
-                                value={password}
-                                onChangeText={setPassword}
-                                placeholder="••••••••••"
-                                placeholderTextColor="#7a7a7a"
-                                secureTextEntry={!isPasswordVisible}
-                            />
-                            <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
-                                <Icon
-                                    name={isPasswordVisible ? "eye-off-outline" : "eye-outline"}
-                                    size={20}
-                                    color="#4d4d4d"
-                                    style={styles.iconRight}
-                                />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+            {/* Display Name Field */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Display Name</Text>
+              <View style={styles.inputWrapper}>
+                <Icon name="person-outline" size={20} color="#4d4d4d" style={styles.icon} />
+                <TextInput
+                  style={styles.input}
+                  value={displayName}
+                  onChangeText={setDisplayName}
+                  placeholder="Display Name"
+                  placeholderTextColor="#7a7a7a"
+                />
+              </View>
+            </View>
 
-                    {/* Country Field in Centered Row */}
-                    <View style={styles.inputContainer}>
-                        <View style={styles.inputWrapperCountry}>
-                            <Icon name="globe-outline" size={20} color="#4d4d4d" style={styles.icon} />
-                            <RNPickerSelect
-                                onValueChange={(value) => setCountry(value)}
-                                items={[
-                                    { label: 'United States', value: 'USA' },
-                                    { label: 'Other', value: 'Other' },
-                                ]}
-                                style={{
-                                    inputIOS: pickerSelectStyles.input,
-                                    inputAndroid: pickerSelectStyles.input,
-                                }}
-                                placeholder={{}}
-                                value={country}
-                                useNativeAndroidPickerStyle={false} // Use custom styling on Android
-                            />
-                        </View>
-                    </View>
-                    <Text></Text>              
-                    <TouchableOpacity style={styles.button} onPress={handleSignup}>
-                        <Text style={styles.buttonText}>Sign Up</Text>
-                    </TouchableOpacity>
-                    <View style={styles.footer}>
-                      <View style={{ flexDirection: 'row' }}>
-                          <Text style={styles.footerText}>Already have an Account? </Text>
-                          <Text 
-                              onPress={() => router.push('/login')}
-                              style={styles.linkText}>
-                              Log In
-                          </Text>
-                      </View>
-                      <Text 
-                          onPress={() => router.push('/ResetPasswordScreen')}
-                          style={styles.linkText}
-                      >
-                          Forgot Password?
-                      </Text>
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
-        </BlurView>
+            {/* Email Field */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Email Address</Text>
+              <View style={styles.inputWrapper}>
+                <Icon name="mail-outline" size={20} color="#4d4d4d" style={styles.icon} />
+                <TextInput
+                  style={styles.input}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="example@domain.com"
+                  placeholderTextColor="#7a7a7a"
+                  keyboardType="email-address"
+                />
+              </View>
+            </View>
+
+            {/* Password Field */}
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Password</Text>
+              <View style={styles.inputWrapper}>
+                <Icon name="lock-closed-outline" size={20} color="#4d4d4d" style={styles.icon} />
+                <TextInput
+                  style={styles.input}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="••••••••••"
+                  placeholderTextColor="#7a7a7a"
+                  secureTextEntry={!isPasswordVisible}
+                />
+                <TouchableOpacity onPress={togglePasswordVisibility}>
+                  <Icon
+                    name={isPasswordVisible ? "eye-off-outline" : "eye-outline"}
+                    size={20}
+                    color="#4d4d4d"
+                    style={styles.iconRight}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Country Field */}
+            <View style={styles.inputContainer}>
+              <View style={styles.inputWrapperCountry}>
+                <Icon name="globe-outline" size={20} color="#4d4d4d" style={styles.icon} />
+                <RNPickerSelect
+                  onValueChange={(value) => setCountry(value)}
+                  items={[
+                    { label: 'United States', value: 'USA' },
+                    { label: 'Other', value: 'Other' },
+                  ]}
+                  style={{
+                    inputIOS: pickerSelectStyles.input,
+                    inputAndroid: pickerSelectStyles.input,
+                  }}
+                  placeholder={{}}
+                  value={country}
+                  useNativeAndroidPickerStyle={false}
+                />
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.button} onPress={handleSignup}>
+              <Text style={styles.buttonText}>Sign Up</Text>
+            </TouchableOpacity>
+
+            <View style={styles.footer}>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={styles.footerText}>Already have an Account? </Text>
+                <Text onPress={() => router.push('/login')} style={styles.linkText}>
+                  Log In
+                </Text>
+              </View>
+              <Text onPress={() => router.push('/ResetPasswordScreen')} style={styles.linkText}>
+                Forgot Password?
+              </Text>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </BlurView>
     </View>
   );
 };
@@ -320,8 +261,8 @@ const pickerSelectStyles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 25,
     shadowOpacity: 0,
-    height: 60, // Increase the height to prevent text cut-off for android
+    //height: 60, // Increase the height to prevent text cut-off for android
   },
 });
 
-export default AuthScreen;
+export default SignupScreen;
