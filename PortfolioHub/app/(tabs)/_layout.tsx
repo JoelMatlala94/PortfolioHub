@@ -4,10 +4,11 @@ import Foundation from '@expo/vector-icons/Foundation';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Link, Tabs } from 'expo-router';
 import { Pressable } from 'react-native';
-
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import { NavigationContainer } from '@react-navigation/native';
+import { HapticTab } from '@/components/HapticTab';
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
@@ -38,6 +39,7 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: useClientOnlyValue(false, true),
+        tabBarButton: HapticTab,
       }}>
       <Tabs.Screen
         name="home"
@@ -79,7 +81,7 @@ export default function TabLayout() {
         name="news"
         options={{
           title: 'News',
-          headerShown: false,
+          //headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="newspaper-o" color={color} />,
         }}
       />
@@ -87,6 +89,7 @@ export default function TabLayout() {
         name="settings"
         options={{
           title: 'Settings',
+          //headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon3 name="settings-outline" color={color} />,
         }}
       />

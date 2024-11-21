@@ -1,27 +1,26 @@
-import Colors from '@/constants/Colors';
-import { defaultStyles } from '@/constants/Styles';
-import { useAssets } from 'expo-asset';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ResizeMode, Video } from 'expo-av';
 import { Link } from 'expo-router';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { defaultStyles } from '@/constants/Styles';
+import useIntroViewModel from '@/viewmodels/IntroViewModel';
 
-const Page = () => {
-  const [assets] = useAssets([require('@/assets/videos/intro.mp4')]);
+const Intro = () => {
+  const { videoUri, headerText } = useIntroViewModel();
 
   return (
     <View style={styles.container}>
-      {assets && (
+      {videoUri && (
         <Video
           resizeMode={ResizeMode.COVER}
           isMuted
           isLooping
           shouldPlay
-          source={{ uri: assets[0].uri }}
+          source={{ uri: videoUri }}
           style={styles.video}
         />
       )}
       <View style={{ marginTop: 80, padding: 20 }}>
-        <Text style={styles.header}>Track, Analyze, Prosper</Text>
+        <Text style={styles.header}>{headerText}</Text>
       </View>
 
       <View style={styles.buttons}>
@@ -70,4 +69,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 });
-export default Page;
+
+export default Intro;
