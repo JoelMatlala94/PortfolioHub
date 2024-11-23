@@ -4,15 +4,7 @@ import { LineChart } from 'react-native-chart-kit';
 import { firestore, auth } from '@/firebaseConfig'; 
 import { collection, addDoc, query, where, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore'; 
 import { onAuthStateChanged } from 'firebase/auth'; 
-
-interface Stock {
-  id: string;  
-  symbol: string;
-  name: string;
-  quantity: number;
-  purchasePrice: number;
-  currentPrice?: number;
-}
+import { Stock } from '@/models/Stock';
 
 const API_KEY = '663038ae8502426f91fbfdc16026e648';
 const screenWidth = Dimensions.get('window').width;

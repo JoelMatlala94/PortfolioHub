@@ -1,40 +1,13 @@
-import React, { useEffect, useState } from 'react';
+// views/NewsTab.tsx
+import React from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
-
-const NEWS_API_KEY = 'd4476345c2594bb59b4ff7c9678fb02d';
+import { useNewsViewModel } from '@/viewmodels/NewsViewModel';
 
 const NewsTab = () => {
-  const [newsArticles, setNewsArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const response = await fetch(
-          `https://newsapi.org/v2/everything?q=stocks+OR+earnings+OR+Fortune+500&apiKey=${NEWS_API_KEY}`
-        );
-        const data = await response.json();
-
-        //console.log('API response:', data);
-
-        if (data.articles && Array.isArray(data.articles)) {
-          setNewsArticles(data.articles);
-        } else {
-          console.error('No articles found in response:', data);
-          setNewsArticles([]);
-        }
-      } catch (error) {
-        console.error('Error fetching news:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchNews();
-  }, []);
+  const { newsArticles, loading } = useNewsViewModel();
 
   const openArticle = (url: string) => {
-    Linking.openURL(url).catch(err => console.error("Couldn't load page", err));
+    Linking.openURL(url).catch((err) => console.error("Couldn't load page", err));
   };
 
   if (loading) {
@@ -97,7 +70,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#007BFF',
-    textDecorationLine: 'underline', 
+    textDecorationLine: 'underline',
   },
   articleDescription: {
     fontSize: 14,
