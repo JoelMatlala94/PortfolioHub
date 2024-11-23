@@ -1,4 +1,3 @@
-// views/NewsTab.tsx
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
 import { useNewsViewModel } from '@/viewmodels/NewsViewModel';
