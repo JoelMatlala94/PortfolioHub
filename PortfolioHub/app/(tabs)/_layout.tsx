@@ -1,7 +1,5 @@
 import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import Foundation from '@expo/vector-icons/Foundation';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { Link, Tabs } from 'expo-router';
 import { Pressable } from 'react-native';
 import Colors from '@/constants/Colors';
@@ -17,20 +15,6 @@ function TabBarIcon(props: {
   return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
 }
 
-function TabBarIcon2(props: {
-  name: React.ComponentProps<typeof Foundation>['name'];
-  color: string;
-}) {
-  return <Foundation size={35} style={{ marginBottom: -3 }} {...props} />;
-}
-
-function TabBarIcon3(props: {
-  name: React.ComponentProps<typeof Ionicons>['name'];
-  color: string;
-}) {
-  return <Ionicons size={35} style={{ marginBottom: -3 }} {...props} />;
-}
-
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
@@ -39,12 +23,14 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: useClientOnlyValue(false, true),
+        tabBarIconStyle: { justifyContent: 'center', alignItems: 'center' }, 
         tabBarButton: HapticTab,
       }}>
       <Tabs.Screen
         name="home"
         options={{
           title: 'Home',
+          headerShown: false,
           headerTitleAlign: 'center',       
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
           headerRight: () => (
@@ -67,7 +53,7 @@ export default function TabLayout() {
         name="portfolio"
         options={{
           title: 'Portfolio',
-          tabBarIcon: ({ color }) => <TabBarIcon2 name="graph-trend" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="bar-chart" color={color} />,
         }}
       />
       <Tabs.Screen
@@ -90,7 +76,7 @@ export default function TabLayout() {
         options={{
           title: 'Settings',
           //headerShown: false,
-          tabBarIcon: ({ color }) => <TabBarIcon3 name="settings-outline" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="gear" color={color} />,
         }}
       />
     </Tabs>
