@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     elevation: 4,
-    zIndex: 1,
+    zIndex: 1, 
   },
   backButton: {
     padding: 10,

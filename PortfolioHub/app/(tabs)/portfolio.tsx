@@ -68,7 +68,11 @@ const PortfolioScreen: React.FC = () => {
           if (latestPrice !== null) {
             await updateDoc(doc.ref, { currentPrice: latestPrice });
           }
-          return { id: doc.id, ...stockData, currentPrice: latestPrice };
+          return {  
+            ...stockData,
+            id: doc.id, 
+            currentPrice: latestPrice 
+          };
         })
       );
       setStocks(stocksList);
@@ -183,8 +187,8 @@ const PortfolioScreen: React.FC = () => {
       <Text style={styles.title}>Portfolio</Text>
 
       <View style={styles.summary}>
-        <Text style={styles.summaryText}>Total Cost: ${calculateTotalPurchaseValue().toFixed(2)}</Text>
-        <Text style={styles.summaryText}>Estimated Gains: ${(calculateTotalCurrentValue() - calculateTotalPurchaseValue()).toFixed(2)}</Text>
+        <Text style={styles.summaryText}>Total Value: {calculateTotalPurchaseValue().toLocaleString("en-US", {style:"currency", currency:"USD"})}</Text>
+        <Text style={styles.summaryText}>Estimated Gains: {(calculateTotalCurrentValue() - calculateTotalPurchaseValue()).toLocaleString("en-US", {style:"currency", currency:"USD"})}</Text>
       </View>
 
       {showChart ? (
@@ -211,7 +215,7 @@ const PortfolioScreen: React.FC = () => {
           <FlatList
             data={stocks}
             renderItem={renderStockItem}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.id.toString()}
           />
           <Button title="View Total Portfolio Performance Chart" onPress={() => setShowChart(true)} />
         </>

@@ -1,10 +1,22 @@
 import { useState, useEffect } from 'react';
 import { auth, firestore } from '@/firebaseConfig';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { Dimensions, Platform, StatusBar } from 'react-native';
 
 const useHomeViewModel = () => {
   const [stocks, setStocks] = useState([]);
   const [error, setError] = useState(null);
+
+  const getHeaderHeight = () => {
+    const { height, width } = Dimensions.get('window');
+    const defaultStatusBarHeight = 24; // Default value for status bar height if undefined
+    const aspectRatio = height / width;
+  
+    if (Platform.OS === 'android') {
+      return (StatusBar.currentHeight || defaultStatusBarHeight); //Android Height
+    }
+    return 56; //Default Height
+  };
 
   const fetchStocksFromFirebase = async () => {
     const user = auth.currentUser;
@@ -36,6 +48,7 @@ const useHomeViewModel = () => {
     fetchStocksFromFirebase,
     totalStockQuantity: calculateTotalQuantity(),
     totalStockValue: calculateTotalValue(),
+    getHeaderHeight,
   };
 };
 

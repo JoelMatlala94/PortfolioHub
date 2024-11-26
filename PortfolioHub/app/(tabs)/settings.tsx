@@ -8,6 +8,7 @@ import { TouchableOpacity } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
+import { Chip } from 'react-native-paper';
 
 export default function SettingsScreen() {
   const [user, setUser] = useState(null);
@@ -68,7 +69,7 @@ export default function SettingsScreen() {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
+    <View style={[styles.container]}>
       {/* Theme Selection */}
       <View style={styles.settingItem}>
         <Text style={styles.settingLabel}>Theme</Text>
@@ -94,6 +95,9 @@ export default function SettingsScreen() {
         </View>
         <Text style={styles.infoText}>Automatic is only supported on operating systems that allow you to control the system-wide color scheme.</Text>
       </View>
+
+    
+      
 
       {/* Account Actions */}
       <View style={styles.settingItem}>
@@ -128,7 +132,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   themeOptions: {
-    //backgroundColor: '#222',
+    backgroundColor: '#222',
     borderRadius: 8,
     padding: 10,
   },

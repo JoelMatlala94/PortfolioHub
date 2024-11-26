@@ -14,9 +14,12 @@ const HomePage = () => {
     fetchStocksFromFirebase,
     totalStockQuantity,
     totalStockValue,
+    getHeaderHeight,
   } = useHomeViewModel();
 
-  const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40'];
+  const headerHeight = getHeaderHeight();
+
+  const colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#FFD700', '#8A2BE2', '#00FFFF', '#FF4500', '#32CD32', '#1E90FF'];
 
   useFocusEffect(
     React.useCallback(() => {
@@ -39,29 +42,29 @@ const HomePage = () => {
   }));
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Portfolio Overview</Text>
+    <ScrollView contentContainerStyle={[styles.container, { paddingTop: headerHeight }]}>
+      <Text style={styles.title}>My Portfolio</Text>
+      <HomePortfolioView
+        totalStockQuantity={totalStockQuantity}
+        totalStockValue={totalStockValue}
+      />
       <View style={styles.chartContainer}>
         <PieChart
           data={chartData}
-          width={screenWidth * 0.85}
+          width={screenWidth}
           height={220}
           chartConfig={{
-            backgroundColor: '#fff',
-            backgroundGradientFrom: '#fff',
-            backgroundGradientTo: '#fff',
+            backgroundColor: '#222',
+            backgroundGradientFrom: '#222',
+            backgroundGradientTo: '#222',
             color: (opacity = 1) => `rgba(0, 0, 255, ${opacity})`,
             labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
             style: { borderRadius: 16 },
           }}
           accessor="quantity"
-          style={{ marginVertical: 8, borderRadius: 16 }}
+          style={{ marginVertical: 8, borderRadius: 125, alignContent: "center" }}
         />
       </View>
-      <HomePortfolioView
-        totalStockQuantity={totalStockQuantity}
-        totalStockValue={totalStockValue}
-      />
     </ScrollView>
   );
 };
@@ -70,24 +73,22 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#222",
     alignItems: 'center',
   },
   title: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#343a40',
+    marginBottom: 10,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 5,
   },
   chartContainer: {
-    backgroundColor: '#ffffff',
-    padding: 20,
+    padding: 15,
     borderRadius: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
     alignItems: 'center',
   },
 });
