@@ -16,11 +16,20 @@ export const useNewsViewModel = () => {
         const data = await response.json();
 
         if (data.articles && Array.isArray(data.articles)) {
-          const articles: NewsArticle[] = data.articles.map((article: any) => ({
-            title: article.title,
-            description: article.description,
-            url: article.url,
-          }));
+          const articles: NewsArticle[] = data.articles
+            .filter((article: any) => (
+              article.author !== null &&
+              article.content !== '[Removed]' &&
+              article.description !== '[Removed]' &&
+              article.title !== '[Removed]' &&
+              article.url !== 'https://removed.com' &&
+              article.urlToImage !== null
+            ))
+            .map((article: any) => ({
+              title: article.title,
+              description: article.description,
+              url: article.url,
+            }));
           setNewsArticles(articles);
         } else {
           console.error('No articles found in response:', data);
