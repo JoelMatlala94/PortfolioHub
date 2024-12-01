@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, ActivityIndicator } from 'react-native';
-import { ThemeProvider } from '@/contexts/ThemeContext';
+import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 import { Stack } from 'expo-router';
 import Colors from '@/constants/Colors';
 import useRootViewModel from '@/hooks/RootLayoutViewModel';
@@ -49,8 +49,8 @@ export default function RootLayout() {
             header: () => <CustomHeader />,
           }}
         />
-        <Stack.Screen name="help" options={{ title: 'Help', presentation: 'modal' }} />
         <Stack.Screen name="(tabs)" options={ { headerShown: false} } />
+        <Stack.Screen name="AddStockModal" options={{ title: 'Add Stock', presentation: 'modal', headerShown: false,}} />
       </Stack>
     </ThemeProvider>
   );

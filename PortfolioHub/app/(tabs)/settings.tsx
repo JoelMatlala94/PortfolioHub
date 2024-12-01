@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, StyleSheet, Alert, TouchableOpacity } from "react-native";
+import { Button, StyleSheet, TouchableOpacity } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { RadioButton } from "react-native-paper";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -9,6 +9,8 @@ import { useTheme } from "@/contexts/ThemeContext";
 export default function SettingsScreen() {
   const { theme, setTheme, currentThemeAttributes } = useTheme();
   const {
+    username,
+    email,
     handleSignOut,
     handleDeleteAccount,
   } = useSettingsViewModel();
@@ -26,9 +28,30 @@ export default function SettingsScreen() {
         { backgroundColor: currentThemeAttributes.backgroundColor },
       ]}
     >
+      <View style= {[styles.settingItem, 
+                   {backgroundColor: currentThemeAttributes.backgroundColor, 
+                    borderColor: currentThemeAttributes.textShadowColor, 
+                    shadowColor: currentThemeAttributes.textShadowColor}]}>
+        <Text style={[styles.accountLabel, { color: currentThemeAttributes.textColor, 
+                                             backgroundColor: currentThemeAttributes.backgroundColor,
+                                             borderColor: currentThemeAttributes.textShadowColor, 
+                                             textShadowColor: currentThemeAttributes.textShadowColor}]}>
+          {username}
+          
+        </Text>
+        <Text style={[styles.infoText, { color: currentThemeAttributes.textColor, 
+                                         backgroundColor: currentThemeAttributes.backgroundColor, 
+                                         textAlign: 'center',
+                                         marginTop: 1}]}>
+          {email}
+        </Text>
+      </View>
       {/* Theme Selection */}
-      <View style={styles.settingItem}>
-        <Text style={[styles.settingLabel, { color: currentThemeAttributes.textColor }]}>
+      <View style={[styles.settingItem, 
+                   {backgroundColor: currentThemeAttributes.backgroundColor, 
+                    borderColor: currentThemeAttributes.textShadowColor, 
+                    shadowColor: currentThemeAttributes.textShadowColor}]}>
+        <Text style={[styles.settingLabel, { color: currentThemeAttributes.textColor, backgroundColor: currentThemeAttributes.backgroundColor }]}>
           Theme
         </Text>
         <View style={[ styles.themeOptions,
@@ -36,7 +59,9 @@ export default function SettingsScreen() {
           {themeOptions.map(({ label, icon }) => (
             <TouchableOpacity
               key={label}
-              style={styles.radioOption}
+              style={[styles.radioOption, 
+                     {borderColor: currentThemeAttributes.textShadowColor, 
+                      shadowColor: currentThemeAttributes.textShadowColor}]}
               onPress={() => setTheme(label)}
             >
               <MaterialIcons name={icon} size={24} color={currentThemeAttributes.iconColor} />
@@ -60,7 +85,10 @@ export default function SettingsScreen() {
       </View>
 
       {/* Account Actions */}
-      <View style={styles.settingItem}>
+      <View style={[styles.settingItem, 
+                  {backgroundColor: currentThemeAttributes.backgroundColor, 
+                   borderColor: currentThemeAttributes.textShadowColor, 
+                   shadowColor: currentThemeAttributes.textShadowColor }]}>
         <Text style={[styles.settingLabel, { color: currentThemeAttributes.textColor }]}>
           Account
         </Text>
@@ -78,12 +106,24 @@ const styles = StyleSheet.create({
   },
   settingItem: {
     marginBottom: 30,
-    backgroundColor: "FFF",
+    padding: 12,
+    borderRadius: 24,
+    shadowOpacity: 1,
+    shadowOffset: { width: 3, height: 4 },
+    shadowRadius: 10
   },
   settingLabel: {
     fontSize: 14,
     textTransform: "uppercase",
     marginBottom: 10,
+  },
+  accountLabel: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginBottom: 6,
+    textAlign: 'center',
+    textShadowOffset: { width: 2, height: 3 },
+    textShadowRadius: 1
   },
   themeOptions: {
     borderRadius: 8,
@@ -93,9 +133,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    marginBottom: 0.5,
     paddingVertical: 8,
     paddingHorizontal: 10,
-    borderRadius: 8,
+    borderRadius: 16,
+    borderWidth: 0.5,
+    shadowOpacity: 1,
+    shadowOffset: { width: 3, height: 4 },
+    shadowRadius: 10,
   },
   optionText: {
     fontSize: 16,

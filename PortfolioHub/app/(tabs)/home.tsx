@@ -35,7 +35,7 @@ const HomePage = () => {
 
   const chartData = stocks.map((item, index) => ({
     name: item.symbol,
-    quantity: item.quantity * item.purchasePrice, // Calculates total value of shares.
+    quantity: item.quantity * item.averagePrice, // Calculates total value of shares.
     color: colors[index % colors.length],
     legendFontColor: currentThemeAttributes.textColor, // Use theme text color
     legendFontSize: 15,

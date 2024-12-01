@@ -41,7 +41,6 @@ export const useNewsViewModel = () => {
         setLoading(false);
       }
     };
-
     fetchNews();
   }, []);
 
