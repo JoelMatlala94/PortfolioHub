@@ -13,11 +13,11 @@ const HomePortfolioView = ({ totalStockQuantity, totalStockValue }) => {
       <Text style={[styles.valueText, { textAlign: 'right', color: currentThemeAttributes.textColor }]}>
           {totalStockValue.toLocaleString("en-US", {style:"currency", currency:"USD"})}
       </Text>
-      <View style={styles.summaryContainer}>
+      <View style={[styles.summaryContainer, { borderBottomColor: currentThemeAttributes.textShadowColor }]}>
         <Text style={[styles.summaryText, { textAlign: 'left', color: currentThemeAttributes.textColor }]}>
           Total Shares:
         </Text>
-        <Text style={[styles.summaryText, { textAlign: 'right', color: currentThemeAttributes.textColor }]}>
+        <Text style={[styles.summaryText, { textAlign: 'right', color: currentThemeAttributes.textColor}]}>
           {totalStockQuantity}
         </Text>
       </View>
@@ -35,7 +35,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    paddingHorizontal: 20,
+    paddingHorizontal: 25,
+    paddingBottom: 30,
+    borderBottomWidth: 3,
   },
   valueText: {
     fontSize: 45,

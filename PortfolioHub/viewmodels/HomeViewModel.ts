@@ -14,7 +14,7 @@ const useHomeViewModel = () => {
     }
 
     try {
-      const q = query(collection(firestore, 'stocks'), where('userId', '==', user.uid));
+      const q = query(collection(firestore, `users/${user?.uid}/stocks`));
       const querySnapshot = await getDocs(q);
       const fetchedStocks = querySnapshot.docs.map((doc) => doc.data());
       setStocks(fetchedStocks);
@@ -27,15 +27,16 @@ const useHomeViewModel = () => {
   const calculateTotalQuantity = () => 
     stocks.reduce((total, stock) => total + stock.quantity, 0);
 
-  const calculateTotalValue = () => 
-    stocks.reduce((total, stock) => total + stock.quantity * stock.purchasePrice, 0);
+  const calculateCurrentValue = () => {
+    return stocks.reduce((total, stock) => total + ((stock.currentPrice || stock.averagePrice) * stock.quantity), 0);
+  };
 
   return {
     stocks,
     error,
     fetchStocksFromFirebase,
     totalStockQuantity: calculateTotalQuantity(),
-    totalStockValue: calculateTotalValue(),
+    totalStockValue: calculateCurrentValue(),
   };
 };
 

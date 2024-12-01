@@ -3,7 +3,6 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link, Tabs } from 'expo-router';
 import { Pressable } from 'react-native';
 import { useTheme } from '@/contexts/ThemeContext';
-import { NavigationContainer } from '@react-navigation/native';
 import { HapticTab } from '@/components/HapticTab';
 
 function TabBarIcon(props: {
@@ -50,6 +49,20 @@ export default function TabLayout() {
           options={{
             title: 'Portfolio',
             tabBarIcon: ({ color }) => <TabBarIcon name="bar-chart" color={color} />,
+            headerRight: () => (
+              <Link href="/AddStockModal" asChild>
+                <Pressable>
+                  {({ pressed }) => (
+                    <FontAwesome
+                      name='plus-circle'
+                      size={25}
+                      color={currentThemeAttributes.textShadowColor}
+                      style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
+                    />
+                  )}
+                </Pressable>
+              </Link>
+            ),
           }}
         />
         <Tabs.Screen
