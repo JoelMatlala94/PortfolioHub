@@ -4,9 +4,9 @@ import { firestore, auth } from '@/firebaseConfig';
 import { Stock } from '@/models/Stock';
 import { Alert, Dimensions } from 'react-native';
 import { onAuthStateChanged } from 'firebase/auth';
-import { differenceInMinutes } from 'date-fns'
+import { differenceInMinutes } from 'date-fns';
+import { API_KEY } from 'react-native-dotenv';
 
-const API_KEY = process.env.API_KEY;
 const screenWidth = Dimensions.get('window').width;
 
 export default function usePortfolioViewModel() {
@@ -31,6 +31,7 @@ export default function usePortfolioViewModel() {
       name: data.name,
       quantity: parseInt(stockQuantity), 
       averagePrice: parseFloat(averagePrice || '0'),
+      date: data.date,
       lastUpdate: now.toISOString(), 
     };
     } catch (error) {
@@ -179,7 +180,6 @@ export default function usePortfolioViewModel() {
         const existingData = stockDocSnap.data();
         const existingQuantity = existingData.quantity || 0;
         const existingAveragePrice = existingData.averagePrice || 0;
-        const existingDates = existingData.dates || [];
         // Calculate new average price
         const totalExistingValue = existingQuantity * existingAveragePrice;
         const newQuantity = existingQuantity + parseFloat(stockQuantity);
@@ -189,13 +189,12 @@ export default function usePortfolioViewModel() {
         await updateDoc(stockDocRef, {
           quantity: newQuantity,
           averagePrice: newAveragePrice.toFixed(2),
-          dates: [...existingDates, new Date().toISOString().split('T')[0]], // Add new purchase date
         });
         // Update local state
         setStocks(
           stocks.map((s) =>
             s.symbol === normalizedSymbol
-              ? { ...s, quantity: newQuantity, averagePrice: newAveragePrice, dates: [...existingDates, new Date().toISOString().split('T')[0]] }
+              ? { ...s, quantity: newQuantity, averagePrice: newAveragePrice }
               : s
           )
         );
@@ -207,12 +206,12 @@ export default function usePortfolioViewModel() {
           quantity: parseFloat(stockQuantity),
           averagePrice: parseFloat(averagePrice),
           purchasePrice: parseFloat(averagePrice),
-          dates: [new Date().toISOString().split('T')[0]], // Initialize purchase dates list
+          date: new Date().toISOString().split('T')[0], // Initialize purchase dates list
         });
         // Update local state
         setStocks([
           ...stocks,
-          { ...stock, quantity: parseFloat(stockQuantity), averagePrice: parseFloat(averagePrice), dates: [new Date().toISOString().split('T')[0]] },
+          { ...stock, quantity: parseFloat(stockQuantity), averagePrice: parseFloat(averagePrice), date: new Date().toISOString().split('T')[0] },
         ]);
         Alert.alert('Success', `${normalizedSymbol} (${stock.name}) added successfully!`);
       }
