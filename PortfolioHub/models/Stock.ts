@@ -4,4 +4,5 @@ export interface Stock {
     quantity: number;
     averagePrice: number;
     currentPrice?: any;
+    lastUpdate: string;
 }  

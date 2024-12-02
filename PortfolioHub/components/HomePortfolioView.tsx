@@ -10,7 +10,7 @@ const HomePortfolioView = ({ totalStockQuantity, totalStockValue }) => {
 
   return (
     <View style={styles.summary}>
-      <Text style={[styles.valueText, { textAlign: 'right', color: currentThemeAttributes.textColor }]}>
+      <Text style={[styles.valueText, { color: currentThemeAttributes.textColor }]}>
           {totalStockValue.toLocaleString("en-US", {style:"currency", currency:"USD"})}
       </Text>
       <View style={[styles.summaryContainer, { borderBottomColor: currentThemeAttributes.textShadowColor }]}>
