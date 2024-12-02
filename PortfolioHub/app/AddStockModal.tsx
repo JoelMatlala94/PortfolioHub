@@ -38,7 +38,7 @@ export default function AddStockModal() {
           />
           <TextInput
             style={[styles.input, { color: currentThemeAttributes.textColor }]}
-            placeholder="Enter quantity"
+            placeholder="Enter quantity (e.g. 1 or 2.425)"
             placeholderTextColor={currentThemeAttributes.textShadowColor}
             value={stockQuantity}
             onChangeText={setStockQuantity}
