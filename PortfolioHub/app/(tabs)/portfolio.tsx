@@ -133,7 +133,7 @@ const PortfolioScreen = () => {
               </View>
             )}
             {!showChart && (
-              <Button title="View Total Portfolio Performance Chart" onPress={() => setShowChart(true)} />
+              <Button title="View Total Portfolio Performance Chart" color={currentThemeAttributes.tintColor} onPress={() => setShowChart(true) } />
             )}
           </View>
         }

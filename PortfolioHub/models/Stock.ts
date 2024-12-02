@@ -5,4 +5,5 @@ export interface Stock {
     averagePrice: number;
     currentPrice?: any;
     lastUpdate: string;
+    date: string;
 }  

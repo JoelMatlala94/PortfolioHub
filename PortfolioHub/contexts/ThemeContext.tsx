@@ -33,8 +33,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateThemeAttributes = (selectedTheme: string) => {
     const attributes =
       selectedTheme === "dark"
-        ? { backgroundColor: "#222", textColor: "#fff", tintColor: "#9146FF", iconColor: "#FFF", check: "#888", textShadowColor: "rgba(255, 255, 255, 0.3)" }
-        : { backgroundColor: "#f0f0f0", textColor: "#000", tintColor: "#9146FF", iconColor: "#888", check: "#222", textShadowColor: "rgba(0, 0, 0, 0.3)" };
+        ? { backgroundColor: "#222", textColor: "#fff", tintColor: "#2346be", iconColor: "#FFF", check: "#888", textShadowColor: "rgba(255, 255, 255, 0.3)" }
+        : { backgroundColor: "#f0f0f0", textColor: "#000", tintColor: "#2346be", iconColor: "#888", check: "#222", textShadowColor: "rgba(0, 0, 0, 0.3)" };
 
     setCurrentThemeAttributes(attributes);
   };
