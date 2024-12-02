@@ -14,7 +14,7 @@ export default function AddStockModal() {
     stockQuantity, 
     setStockQuantity,
     averagePrice, 
-    setAveragePrice
+    setAveragePrice,
   } = usePortfolioViewModel();
   const router = useRouter();
 
@@ -46,7 +46,7 @@ export default function AddStockModal() {
           />
           <TextInput
             style={[styles.input, { color: currentThemeAttributes.textColor }]}
-            placeholder="Enter Average Price"
+            placeholder="Enter Average Price or Price Paid"
             placeholderTextColor={currentThemeAttributes.textShadowColor}
             value={averagePrice}
             onChangeText={setAveragePrice}

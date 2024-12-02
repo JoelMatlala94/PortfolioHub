@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { collection, addDoc, query, where, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, deleteDoc, doc, updateDoc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { firestore, auth } from '@/firebaseConfig';
 import { Stock } from '@/models/Stock';
 import { Alert, Dimensions } from 'react-native';
 import { onAuthStateChanged } from 'firebase/auth';
+import { differenceInMinutes } from 'date-fns'
 
-const API_KEY = '663038ae8502426f91fbfdc16026e648';
+const API_KEY = process.env.API_KEY;
 const screenWidth = Dimensions.get('window').width;
 
 export default function usePortfolioViewModel() {
@@ -19,6 +20,7 @@ export default function usePortfolioViewModel() {
   try {
     const response = await fetch(`https://api.twelvedata.com/quote?symbol=${symbol}&apikey=${API_KEY}`);
     const data = await response.json();
+    const now = new Date();
     if (data.code || !data.symbol || !data.name) {
       Alert.alert('Error', 'Invalid stock symbol or API error. Please try again.');
       return null;
@@ -28,7 +30,8 @@ export default function usePortfolioViewModel() {
       symbol: data.symbol,
       name: data.name,
       quantity: parseInt(stockQuantity), 
-      averagePrice: parseFloat(averagePrice || '0'), 
+      averagePrice: parseFloat(averagePrice || '0'),
+      lastUpdate: now.toISOString(), 
     };
     } catch (error) {
       console.error('Error fetching stock data from API:', error);
@@ -50,26 +53,43 @@ export default function usePortfolioViewModel() {
 
   const fetchStocks = async () => {
     const user = auth.currentUser;
-
     if (!user) {
       Alert.alert('Error', 'No user is logged in.');
       return;
     }
-
+    const isMarketOpen = () => {
+      const now = new Date();
+      const day = now.getDay(); // Sunday - Saturday : 0 - 6
+      const hour = now.getHours();
+      // Market open hours: Weekdays 9:30 AM to 4:00 PM
+      const isWeekday = day > 0 && day < 6; // Monday to Friday
+      const isWithinMarketHours = hour >= 9 && (hour < 16 || (hour === 9 && now.getMinutes() >= 30));
+      return isWeekday && isWithinMarketHours;
+    };
     try {
       const q = query(collection(firestore, `users/${user?.uid}/stocks`));
       const querySnapshot = await getDocs(q);
       const stocksList = await Promise.all(
         querySnapshot.docs.map(async (doc) => {
           const stockData = doc.data() as Stock;
-          const latestPrice = await fetchLatestPrice(stockData.symbol);
-          if (latestPrice !== null) {
-            await updateDoc(doc.ref, { currentPrice: latestPrice });
+          // Check the last update time
+          const lastUpdate = stockData.lastUpdate ? new Date(stockData.lastUpdate) : null;
+          const now = new Date();
+          const shouldUpdatePrice =
+            !stockData.currentPrice || // Update if currentPrice is missing
+            (isMarketOpen() && (!lastUpdate || differenceInMinutes(now, lastUpdate) >= 120));
+          // Update the price only if the market is open
+          if (shouldUpdatePrice) {
+            const latestPrice = await fetchLatestPrice(stockData.symbol);
+            if (latestPrice !== null) {
+              await updateDoc(doc.ref, { 
+                currentPrice: latestPrice,
+                lastUpdate: now.toISOString(),  
+              });
+              return { ...stockData, currentPrice: latestPrice, lastUpdate: now.toISOString()};
+            }
           }
-          return {  
-            ...stockData,
-            currentPrice: latestPrice,
-          };
+          return stockData;
         })
       );
       setStocks(stocksList);
@@ -78,7 +98,7 @@ export default function usePortfolioViewModel() {
       Alert.alert('Error', 'Failed to fetch stocks from Firestore.');
     }
   };
-
+  
   const calculateTotalReturn = () => {
     return stocks.reduce((total, stock) => total + (stock.averagePrice * stock.quantity), 0);
   };
@@ -97,6 +117,11 @@ export default function usePortfolioViewModel() {
     return ((stock.currentPrice - stock.averagePrice) / stock.averagePrice * 100);
   }
 
+  const calculateStockValue = (stock: Stock) => {
+    if (stock.currentPrice - stock.averagePrice === 0) return 0;
+    return ((stock.quantity*stock.currentPrice)-(stock.quantity*stock.averagePrice));
+  }
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -109,12 +134,33 @@ export default function usePortfolioViewModel() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const userID = auth.currentUser?.uid;
+    // Real-time listener for stock updates
+    const unsubscribe = onSnapshot(
+      collection(firestore, `users/${userID}/stocks`),
+      (snapshot) => {
+        const updatedStocks = snapshot.docs.map((doc) => ({
+          ...doc.data() as Stock,
+        }));
+        setStocks(updatedStocks); // Update state with the latest data
+        fetchStocks();
+      },
+      (error) => {
+        console.error('Error listening to stock updates:', error);
+        Alert.alert('Error', 'Failed to listen to stock updates.');
+      }
+    );
+    return () => unsubscribe();
+  }, []);
+
   const addStock = async () => {
     if (!stockSymbol || !stockQuantity || !averagePrice) {
-      Alert.alert('Error', 'Please enter a stock symbol, a quantity and average price paid.');
+      Alert.alert('Error', 'Please enter a stock symbol, a quantity, and an average price paid.');
       return;
     }
-    const stock = await fetchStockFromAPI(stockSymbol);
+    const normalizedSymbol = stockSymbol.trim().toUpperCase(); // Normalize stock symbol
+    const stock = await fetchStockFromAPI(normalizedSymbol);
     const user = auth.currentUser;
     if (!user) {
       Alert.alert('Error', 'No user is logged in.');
@@ -125,21 +171,62 @@ export default function usePortfolioViewModel() {
       return;
     }
     try {
-      const docRef = await addDoc(collection(firestore, `users/${user?.uid}/stocks`), {
-        ...stock,
-        date: new Date().toISOString().split('T')[0], //Gets the purchase date in YYYY-MM-DD format. 
-      });
-      setStocks([...stocks, { ...stock}]);
-      Alert.alert('Success', `${stock.symbol} (${stock.name}) added successfully!`);
+      const stockRef = collection(firestore, `users/${user.uid}/stocks`);
+      const stockDocRef = doc(stockRef, normalizedSymbol); // Use symbol as the document ID
+      const stockDocSnap = await getDoc(stockDocRef);
+      if (stockDocSnap.exists()) {
+        // Stock already exists, update it
+        const existingData = stockDocSnap.data();
+        const existingQuantity = existingData.quantity || 0;
+        const existingAveragePrice = existingData.averagePrice || 0;
+        const existingDates = existingData.dates || [];
+        // Calculate new average price
+        const totalExistingValue = existingQuantity * existingAveragePrice;
+        const newQuantity = existingQuantity + parseFloat(stockQuantity);
+        const newTotalValue = totalExistingValue + parseFloat(stockQuantity) * parseFloat(averagePrice);
+        const newAveragePrice = newTotalValue / newQuantity;
+        // Update stock document
+        await updateDoc(stockDocRef, {
+          quantity: newQuantity,
+          averagePrice: newAveragePrice.toFixed(2),
+          dates: [...existingDates, new Date().toISOString().split('T')[0]], // Add new purchase date
+        });
+        // Update local state
+        setStocks(
+          stocks.map((s) =>
+            s.symbol === normalizedSymbol
+              ? { ...s, quantity: newQuantity, averagePrice: newAveragePrice, dates: [...existingDates, new Date().toISOString().split('T')[0]] }
+              : s
+          )
+        );
+        Alert.alert('Success', `Updated ${normalizedSymbol} (${stock.name}) successfully!`);
+      } else {
+        // Stock doesn't exist, add a new document
+        await setDoc(stockDocRef, {
+          ...stock,
+          quantity: parseFloat(stockQuantity),
+          averagePrice: parseFloat(averagePrice),
+          purchasePrice: parseFloat(averagePrice),
+          dates: [new Date().toISOString().split('T')[0]], // Initialize purchase dates list
+        });
+        // Update local state
+        setStocks([
+          ...stocks,
+          { ...stock, quantity: parseFloat(stockQuantity), averagePrice: parseFloat(averagePrice), dates: [new Date().toISOString().split('T')[0]] },
+        ]);
+        Alert.alert('Success', `${normalizedSymbol} (${stock.name}) added successfully!`);
+      }
     } catch (error) {
-      console.error('Error adding stock:', error);
+      console.error('Error adding/updating stock:', error);
       Alert.alert('Error', 'Failed to save the stock to Firestore.');
     }
+    // Clear input fields and reset state
     setStockSymbol('');
     setStockQuantity('');
-    setIsAddingStock(false); 
-  };
-
+    setAveragePrice('');
+    setIsAddingStock(false);
+  };  
+  
   const removeStock = async (symbol: string) => {
     const user = auth.currentUser;
     if (!user) {
@@ -178,5 +265,6 @@ export default function usePortfolioViewModel() {
     calculateCurrentValue,
     calculatePercentageGain,
     calculateStockPercentageGain,
+    calculateStockValue,
   };
 }
