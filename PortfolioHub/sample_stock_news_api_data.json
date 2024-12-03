@@ -1,0 +1,304 @@
+{
+    "results": [
+        {
+            "id": "6a05f1ff17de4d7b1a5e4ca1af5cc90e735c0b5ea6dbeb88461d23e49232fd49",
+            "publisher": {
+                "name": "The Motley Fool",
+                "homepage_url": "https://www.fool.com/",
+                "logo_url": "https://s3.polygon.io/public/assets/news/logos/themotleyfool.svg",
+                "favicon_url": "https://s3.polygon.io/public/assets/news/favicons/themotleyfool.ico"
+            },
+            "title": "Warren Buffett Owns 1 Vanguard ETF That Could Be Poised to Plunge, According to a Top Wall Street Analyst",
+            "author": "Keith Speights",
+            "published_utc": "2024-12-02T10:53:00Z",
+            "article_url": "https://www.fool.com/investing/2024/12/02/warren-buffett-owns-1-vanguard-etf-that-could-be-p/?source=iedfolrf0000001",
+            "tickers": [
+                "VOO",
+                "SPY"
+            ],
+            "image_url": "https://g.foolcdn.com/editorial/images/799328/buffett2-tmf.jpg",
+            "description": "According to a top Wall Street analyst, the Vanguard S&P 500 ETF owned by Warren Buffett could be poised to plunge in 2025 due to concerns about market valuation and the macroeconomic outlook.",
+            "keywords": [
+                "Warren Buffett",
+                "Vanguard S&P 500 ETF",
+                "stock market",
+                "economic outlook"
+            ],
+            "insights": [
+                {
+                    "ticker": "VOO",
+                    "sentiment": "negative",
+                    "sentiment_reasoning": "The article suggests that the Vanguard S&P 500 ETF, which is owned by Warren Buffett, could be poised to plunge in 2025 according to a top Wall Street analyst's prediction of a 26% drop in the S&P 500 index."
+                },
+                {
+                    "ticker": "SPY",
+                    "sentiment": "negative",
+                    "sentiment_reasoning": "The article indicates that the SPDR S&P 500 ETF Trust, which is also held by Berkshire Hathaway, could be affected by the predicted plunge in the S&P 500 index."
+                }
+            ]
+        },
+        {
+            "id": "83977fc9fcdcfe9fccf2568097c95f0998b819b00219e7c79980e22de01849c4",
+            "publisher": {
+                "name": "The Motley Fool",
+                "homepage_url": "https://www.fool.com/",
+                "logo_url": "https://s3.polygon.io/public/assets/news/logos/themotleyfool.svg",
+                "favicon_url": "https://s3.polygon.io/public/assets/news/favicons/themotleyfool.ico"
+            },
+            "title": "Know About Index Funds? This Simple Strategy Would Have Beaten the Pros This Year.",
+            "author": "Jeremy Bowman",
+            "published_utc": "2024-12-01T11:38:00Z",
+            "article_url": "https://www.fool.com/investing/2024/12/01/know-about-index-funds-this-simple-strategy-would/?source=iedfolrf0000001",
+            "tickers": [
+                "SPY",
+                "VOO"
+            ],
+            "image_url": "https://g.foolcdn.com/editorial/images/799233/professional-stock-trader-broker-analyze-stock-chart-invest-retire.jpg",
+            "description": "The S&P 500 is on track to have one of its best performances in decades, up 26.2% so far in 2024. Wall Street's forecasts have been wildly off, with hedge funds and macro funds underperforming the index. Investing in an S&P 500 index fund is an easy way for individual investors to capitalize on the market's gains and beat the pros.",
+            "keywords": [
+                "S&P 500",
+                "stock market",
+                "index funds",
+                "hedge funds",
+                "Wall Street"
+            ],
+            "insights": [
+                {
+                    "ticker": "SPY",
+                    "sentiment": "positive",
+                    "sentiment_reasoning": "Investing in an S&P 500 index fund like the SPDR S&P 500 ETF is an easy way for individual investors to capitalize on the market's gains and beat the pros."
+                },
+                {
+                    "ticker": "VOO",
+                    "sentiment": "positive",
+                    "sentiment_reasoning": "Investing in an S&P 500 index fund like the Vanguard S&P 500 ETF is an easy way for individual investors to capitalize on the market's gains and beat the pros."
+                }
+            ]
+        },
+        {
+            "id": "6eb62d0f91c7fa5e2052466c2dae402748e8afcaeb3a0e49ad4c21dca8745c2d",
+            "publisher": {
+                "name": "The Motley Fool",
+                "homepage_url": "https://www.fool.com/",
+                "logo_url": "https://s3.polygon.io/public/assets/news/logos/themotleyfool.svg",
+                "favicon_url": "https://s3.polygon.io/public/assets/news/favicons/themotleyfool.ico"
+            },
+            "title": "If I Could Only Buy and Hold a Single Stock, This Would Be It",
+            "author": "Anders Bylund",
+            "published_utc": "2024-11-28T16:29:00Z",
+            "article_url": "https://www.fool.com/investing/2024/11/28/buy-and-hold-a-single-stock-forever/?source=iedfolrf0000001",
+            "tickers": [
+                "BRK.A",
+                "BRK.B",
+                "GOOG",
+                "GOOGL",
+                "AMZN",
+                "VOO",
+                "AAPL"
+            ],
+            "image_url": "https://g.foolcdn.com/editorial/images/799234/buffett17-tmf.jpg",
+            "description": "Berkshire Hathaway is the closest thing to a 'forever stock' due to its diverse business portfolio, strong leadership, and ability to maintain performance even after Warren Buffett's departure.",
+            "keywords": [
+                "Berkshire Hathaway",
+                "Warren Buffett",
+                "forever stock",
+                "diversification"
+            ],
+            "insights": [
+                {
+                    "ticker": "BRK.A",
+                    "sentiment": "positive",
+                    "sentiment_reasoning": "The article highlights Berkshire Hathaway as the best choice for a 'forever stock' due to its diverse business portfolio, strong leadership under Warren Buffett, and ability to maintain performance even after Buffett's departure."
+                },
+                {
+                    "ticker": "BRK.B",
+                    "sentiment": "positive",
+                    "sentiment_reasoning": "The article highlights Berkshire Hathaway as the best choice for a 'forever stock' due to its diverse business portfolio, strong leadership under Warren Buffett, and ability to maintain performance even after Buffett's departure."
+                },
+                {
+                    "ticker": "GOOG",
+                    "sentiment": "neutral",
+                    "sentiment_reasoning": "The article considers Alphabet as a potential 'forever stock' but ultimately concludes that it does not provide the same level of diversification as Berkshire Hathaway."
+                },
+                {
+                    "ticker": "GOOGL",
+                    "sentiment": "neutral",
+                    "sentiment_reasoning": "The article considers Alphabet as a potential 'forever stock' but ultimately concludes that it does not provide the same level of diversification as Berkshire Hathaway."
+                },
+                {
+                    "ticker": "AMZN",
+                    "sentiment": "neutral",
+                    "sentiment_reasoning": "The article considers Amazon as a potential 'forever stock' but ultimately concludes that it does not provide the same level of diversification as Berkshire Hathaway."
+                },
+                {
+                    "ticker": "VOO",
+                    "sentiment": "neutral",
+                    "sentiment_reasoning": "The article mentions the Vanguard S&P 500 ETF as a potential 'forever stock' but dismisses it as not being a single stock, which is the requirement for the thought experiment."
+                },
+                {
+                    "ticker": "AAPL",
+                    "sentiment": "positive",
+                    "sentiment_reasoning": "The article mentions Apple as one of the major investments in Berkshire Hathaway's portfolio, which contributes to the diversification of the conglomerate."
+                }
+            ]
+        },
+        {
+            "id": "50d53fa7bc68a1a2292f7e7646a1e8209bc32df57fca298afb852b1063fd7d2e",
+            "publisher": {
+                "name": "The Motley Fool",
+                "homepage_url": "https://www.fool.com/",
+                "logo_url": "https://s3.polygon.io/public/assets/news/logos/themotleyfool.svg",
+                "favicon_url": "https://s3.polygon.io/public/assets/news/favicons/themotleyfool.ico"
+            },
+            "title": "Here's the Average Stock Market Return Over the Last 10 Years, and What It Means for the Next 10 Years",
+            "author": "The Motley Fool",
+            "published_utc": "2024-11-28T09:15:00Z",
+            "article_url": "https://www.fool.com/investing/2024/11/28/average-stock-market-return-last-10-years-learn/?source=iedfolrf0000001",
+            "tickers": [
+                "VOO",
+                "DIA",
+                "ONEQ"
+            ],
+            "image_url": "https://g.foolcdn.com/editorial/images/799284/market-13.jpg",
+            "description": "The S&P 500, Dow Jones Industrial Average, and Nasdaq Composite have all seen significant gains over the past decade, with the Nasdaq Composite leading the pack. While past performance is not a guarantee of future results, the article suggests that investors can expect reasonable returns in the 8-11% range for the S&P 500 over the next decade.",
+            "keywords": [
+                "stock market",
+                "S&P 500",
+                "Dow Jones Industrial Average",
+                "Nasdaq Composite",
+                "index funds",
+                "investment returns"
+            ],
+            "insights": [
+                {
+                    "ticker": "VOO",
+                    "sentiment": "positive",
+                    "sentiment_reasoning": "The article suggests that investors can get exposure to the broad-based S&P 500 by purchasing shares of an index fund like the Vanguard S&P 500 ETF, which would provide them with exposure to the expected reasonable returns in the 8-11% range for the S&P 500 over the next decade."
+                },
+                {
+                    "ticker": "DIA",
+                    "sentiment": "positive",
+                    "sentiment_reasoning": "The article suggests that investors can get exposure to the Dow Jones Industrial Average by purchasing shares of index funds such as the SPDR Dow Jones Industrial Average ETF, which would provide them with exposure to the expected reasonable returns in the 8-11% range for the S&P 500 over the next decade, which would likely translate to similar returns for the Dow Jones Industrial Average."
+                },
+                {
+                    "ticker": "ONEQ",
+                    "sentiment": "positive",
+                    "sentiment_reasoning": "The article suggests that investors can get exposure to the Nasdaq Composite through funds such as the Fidelity Nasdaq Composite ETF, which would provide them with exposure to the expected reasonable returns in the 8-11% range for the S&P 500 over the next decade, which would likely translate to similar returns for the Nasdaq Composite."
+                }
+            ]
+        },
+        {
+            "id": "3d7a5a0ea98613d31df39e725ecabfaae955704e32944632dbfe824eb0b2eebc",
+            "publisher": {
+                "name": "The Motley Fool",
+                "homepage_url": "https://www.fool.com/",
+                "logo_url": "https://s3.polygon.io/public/assets/news/logos/themotleyfool.svg",
+                "favicon_url": "https://s3.polygon.io/public/assets/news/favicons/themotleyfool.ico"
+            },
+            "title": "This 1 Simple ETF Could Turn $1,000 a Month Into $1 Million",
+            "author": "Leo Sun",
+            "published_utc": "2024-11-23T09:45:00Z",
+            "article_url": "https://www.fool.com/investing/2024/11/23/this-1-simple-etf-could-turn-1000-a-month-into-1-m/?source=iedfolrf0000001",
+            "tickers": [
+                "VOO"
+            ],
+            "image_url": "https://g.foolcdn.com/editorial/images/798090/glass-piggy-bank-on-a-rocket.jpg",
+            "description": "The article discusses how investing $1,000 per month in the Vanguard S&P 500 ETF (VOO) can potentially turn into over $1 million in just over 23 years, thanks to the power of compound returns. It highlights the S&P 500's long-term average annual gain of 10% and the benefits of a passive, diversified investment strategy.",
+            "keywords": [
+                "investing",
+                "retirement",
+                "S&P 500",
+                "Vanguard",
+                "ETF"
+            ],
+            "insights": [
+                {
+                    "ticker": "VOO",
+                    "sentiment": "positive",
+                    "sentiment_reasoning": "The article presents the Vanguard S&P 500 ETF as a favorable investment option for turning $1,000 per month into over $1 million in just over 20 years, thanks to the S&P 500's historical average annual return of 10%."
+                }
+            ]
+        },
+        {
+            "id": "8e6f7c324781ac7aee5efa181a59b760377aa5f6acb055aea41eccebd8426ff2",
+            "publisher": {
+                "name": "The Motley Fool",
+                "homepage_url": "https://www.fool.com/",
+                "logo_url": "https://s3.polygon.io/public/assets/news/logos/themotleyfool.svg",
+                "favicon_url": "https://s3.polygon.io/public/assets/news/favicons/themotleyfool.ico"
+            },
+            "title": "5 Reasons to Buy This Index Fund and Hold for a Lifetime",
+            "author": "Justin Pope",
+            "published_utc": "2024-11-22T09:40:00Z",
+            "article_url": "https://www.fool.com/investing/2024/11/22/reasons-buy-index-fund-voo-hold-for-lifetime/?source=iedfolrf0000001",
+            "tickers": [
+                "VOO"
+            ],
+            "image_url": "https://g.foolcdn.com/editorial/images/798394/sp-500-etf.jpg",
+            "description": "The article discusses the Vanguard S&P 500 ETF (VOO) as a timeless investment, highlighting its diversification, low fees, Vanguard's reputation, and the S&P 500's historical performance as reasons to hold it in one's portfolio permanently.",
+            "keywords": [
+                "Vanguard S&P 500 ETF",
+                "S&P 500 index",
+                "index fund",
+                "diversification",
+                "low fees",
+                "Vanguard"
+            ],
+            "insights": [
+                {
+                    "ticker": "VOO",
+                    "sentiment": "positive",
+                    "sentiment_reasoning": "The article presents the Vanguard S&P 500 ETF as a highly recommended long-term investment due to its diversification, low fees, and the strong historical performance of the S&P 500 index it tracks."
+                }
+            ]
+        },
+        {
+            "id": "5eb168f56068d558db662561632e2942431417253e9dc851f1573193d2345b20",
+            "publisher": {
+                "name": "The Motley Fool",
+                "homepage_url": "https://www.fool.com/",
+                "logo_url": "https://s3.polygon.io/public/assets/news/logos/themotleyfool.svg",
+                "favicon_url": "https://s3.polygon.io/public/assets/news/favicons/themotleyfool.ico"
+            },
+            "title": "Should You Buy Taiwan Semiconductor Manufacturing Stock Before Jan. 20?",
+            "author": "Will Healy",
+            "published_utc": "2024-11-19T09:25:00Z",
+            "article_url": "https://www.fool.com/investing/2024/11/19/should-you-buy-tsmc-stock-before-january-20/?source=iedfolrf0000001",
+            "tickers": [
+                "TSM",
+                "INTC",
+                "VOO"
+            ],
+            "image_url": "https://g.foolcdn.com/editorial/images/797998/taiwan-semiconductor-tsmc-office-with-tsmc-logo-on-wall_tsmc.jpg",
+            "description": "The article discusses how the 2024 U.S. election could impact Taiwan Semiconductor Manufacturing (TSMC), the world's largest and most advanced semiconductor producer. While the incoming administration may push for more domestic manufacturing, TSMC's dominance and the realities of fab construction mean the U.S. will likely continue to rely on imports. The article also analyzes TSMC's financial performance and valuation compared to its major customers.",
+            "keywords": [
+                "TSMC",
+                "semiconductor industry",
+                "U.S. manufacturing",
+                "2024 election",
+                "chip stocks"
+            ],
+            "insights": [
+                {
+                    "ticker": "TSM",
+                    "sentiment": "positive",
+                    "sentiment_reasoning": "The article suggests that TSMC is likely to remain an important player in the semiconductor industry despite potential political pressure, as it is indispensable to the tech industry and the global economy. The company's strong financial performance and attractive valuation compared to its major customers also make it a potentially attractive investment."
+                },
+                {
+                    "ticker": "INTC",
+                    "sentiment": "neutral",
+                    "sentiment_reasoning": "The article mentions that Intel is building a fab in the U.S., but it will likely take several years for the facility to begin production, indicating that the company may not be able to immediately address the incoming administration's push for more domestic manufacturing."
+                },
+                {
+                    "ticker": "VOO",
+                    "sentiment": "neutral",
+                    "sentiment_reasoning": "The article does not directly discuss the Vanguard S&P 500 ETF, but it focuses on the semiconductor industry and specific companies within that sector, rather than the broader market."
+                }
+            ]
+        }
+    ],
+    "status": "OK",
+    "request_id": "3e0a7e1ee88f74f71e7a2090b1c84e53",
+    "count": 7,
+    "next_url": "https://api.polygon.io/v2/reference/news?cursor=YXA9MjAyNC0xMS0wNVQxNSUzQTE1JTNBMDBaJmFzPTM3ZmI0ZWY3MjFkYTk3NjlkMDZhZTg3YWZhNjc0NjcxMmU0OGNiZTVjZjYyNDdjYzg1OTY4ZDExNTJiOThjMTAmbGltaXQ9MTUmb3JkZXI9ZGVzY2VuZGluZyZ0aWNrZXI9Vk9P"
+}
