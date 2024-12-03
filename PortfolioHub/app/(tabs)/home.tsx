@@ -53,10 +53,10 @@ const HomePage = () => {
         <Text
           style={[
             styles.title,
-            { color: currentThemeAttributes.textColor, textShadowColor: currentThemeAttributes.textShadowColor },
+            { color: currentThemeAttributes.textColor, textShadowColor: currentThemeAttributes.textShadowColor},
           ]}
         >
-          My Portfolio
+          Home
         </Text>
         <HomePortfolioView
           totalStockQuantity={totalStockQuantity}

@@ -8,7 +8,7 @@ const getHeaderHeight = () => {
     if (Platform.OS === 'android') {
         return (StatusBar.currentHeight || defaultStatusBarHeight); //Android Height
     }
-    return 56; //Default Height
+    return 71; //Default Height
 };
 
 export { getHeaderHeight };

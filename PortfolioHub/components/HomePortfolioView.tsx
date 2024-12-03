@@ -18,7 +18,7 @@ const HomePortfolioView = ({ totalStockQuantity, totalStockValue }) => {
           Total Shares:
         </Text>
         <Text style={[styles.summaryText, { textAlign: 'right', color: currentThemeAttributes.textColor}]}>
-          {totalStockQuantity}
+          {totalStockQuantity.toFixed(3)}
         </Text>
       </View>
       <Divider bold />
