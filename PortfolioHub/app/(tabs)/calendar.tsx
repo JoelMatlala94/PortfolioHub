@@ -1,100 +1,84 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, Modal, TextInput, Button, FlatList, Alert, TouchableOpacity } from 'react-native';
-import { Calendar } from 'react-native-calendars';
+import React, { useEffect } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { Agenda } from 'react-native-calendars';
+import { useTheme } from '@/contexts/ThemeContext';
+import useCalendarViewModel from '@/viewmodels/CalendarViewModel';
 
 const CalendarScreen = () => {
-  const [selectedDay, setSelectedDay] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [eventName, setEventName] = useState('');
-  const [events, setEvents] = useState({});
+  const { currentThemeAttributes, theme } = useTheme();
+  const { events, fetchDividendDates, calendarKey } = useCalendarViewModel();
 
-  const onDayPress = (day) => {
-    setSelectedDay(day.dateString);
-    setModalVisible(true);
-  };
+  useEffect(() => {
+    fetchDividendDates(); // Fetch dividend dates when the component mounts
+  }, [fetchDividendDates]);
 
-  const addEvent = () => {
-    if (!eventName) {
-      Alert.alert('Error', 'Please enter an event name.');
-      return;
-    }
-
-    const newEvents = { ...events };
-    if (!newEvents[selectedDay]) {
-      newEvents[selectedDay] = [];
-    }
-    newEvents[selectedDay].push(eventName);
-    
-    setEvents(newEvents);
-    setEventName('');
-    setModalVisible(false);
-  };
-
-  const handleRemoveEvent = (event) => {
-    const newEvents = { ...events };
-    newEvents[selectedDay] = newEvents[selectedDay].filter(e => e !== event);
-    setEvents(newEvents);
-  };
-
-  const renderEvents = () => {
-    const eventList = events[selectedDay] || [];
-    return (
-      <FlatList
-        data={eventList}
-        renderItem={({ item }) => (
-          <View style={styles.eventItemContainer}>
-            <Text style={styles.eventItem}>{item}</Text>
-            <TouchableOpacity onPress={() => handleRemoveEvent(item)}>
-              <Text style={styles.removeText}>Remove</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        keyExtractor={(item, index) => index.toString()}
-      />
-    );
-  };
+  useEffect(() => {
+    console.log('Theme changed to:', theme); // Log theme changes
+  }, [theme]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Calendar</Text>
-      <Calendar
-        onDayPress={onDayPress}
-        style={styles.calendar}
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: currentThemeAttributes.backgroundColor },
+      ]}
+    >
+      <Text style={[styles.title, { color: currentThemeAttributes.textColor }]}>
+        Calendar
+      </Text>
+      <Agenda
+        key={calendarKey} // Unique key forces re-render on theme change
+        items={events}
+        renderItem={(item) => (
+          <View
+            style={[
+              styles.eventItemContainer,
+              { backgroundColor: currentThemeAttributes.backgroundColor },
+            ]}
+          >
+            <Text
+              style={[
+                styles.eventItem,
+                { color: currentThemeAttributes.textColor },
+              ]}
+            >
+              {item.name}
+            </Text>
+          </View>
+        )}
+        renderEmptyDate={() => (
+          <View
+            style={[
+              styles.emptyDate,
+              { backgroundColor: currentThemeAttributes.backgroundColor },
+            ]}
+          >
+            <Text
+              style={[
+                styles.noEventsText,
+                { color: currentThemeAttributes.textColor },
+              ]}
+            >
+              No events on this date.
+            </Text>
+          </View>
+        )}
         theme={{
-          todayTextColor: '#00adf5',
+          backgroundColor: currentThemeAttributes.backgroundColor,
+          calendarBackground: currentThemeAttributes.backgroundColor,
+          textSectionTitleColor: currentThemeAttributes.textColor,
           selectedDayBackgroundColor: '#00adf5',
-          selectedDayTextColor: '#ffffff',
-          dayTextColor: '#2d4150',
+          selectedDayTextColor: currentThemeAttributes.backgroundColor,
+          dayTextColor: currentThemeAttributes.textColor,
           textDisabledColor: '#d9e1e8',
-          arrowColor: '#00adf5',
+          dotColor: '#00adf5',
+          selectedDotColor: currentThemeAttributes.backgroundColor,
+          arrowColor: currentThemeAttributes.textColor,
+          monthTextColor: currentThemeAttributes.textColor,
+          indicatorColor: currentThemeAttributes.textColor,
+          todayTextColor: '#00adf5',
         }}
       />
-      {selectedDay && (
-        <View style={styles.eventsContainer}>
-          <Text style={styles.eventsTitle}>Events on {selectedDay}:</Text>
-          {renderEvents()}
-        </View>
-      )}
-
-      {/* Modal for adding events */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>Add Event</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Event Name"
-            value={eventName}
-            onChangeText={setEventName}
-          />
-          <Button title="Add Event" onPress={addEvent} />
-          <Button title="Cancel" onPress={() => setModalVisible(false)} color="#FF3D00" />
-        </View>
-      </Modal>
     </View>
   );
 };
@@ -102,59 +86,31 @@ const CalendarScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+    paddingTop: 50,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  calendar: {
-    marginTop: 20,
-  },
-  eventsContainer: {
-    marginTop: 20,
-  },
-  eventsTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
   },
   eventItemContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    borderRadius: 8,
     padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    margin: 10,
   },
   eventItem: {
     fontSize: 16,
   },
-  removeText: {
-    color: 'red',
-    fontWeight: 'bold',
+  noEventsText: {
+    fontSize: 16,
+    fontStyle: 'italic',
+    textAlign: 'center',
   },
-  modalContainer: {
-    flex: 1,
+  emptyDate: {
+    height: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    padding: 20,
-  },
-  modalTitle: {
-    fontSize: 20,
-    marginBottom: 20,
-    color: '#fff',
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 15,
-    paddingHorizontal: 10,
-    width: '100%',
-    backgroundColor: '#fff',
   },
 });
 
