@@ -6,4 +6,5 @@ export interface Stock {
     currentPrice?: any;
     lastUpdate: string;
     date: string;
+    lastNewsUpdate: string;
 }  

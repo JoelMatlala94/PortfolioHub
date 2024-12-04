@@ -33,6 +33,7 @@ export default function usePortfolioViewModel() {
       averagePrice: parseFloat(averagePrice || '0'),
       date: data.date,
       lastUpdate: now.toISOString(), 
+      lastNewsUpdate: "",
     };
     } catch (error) {
       console.error('Error fetching stock data from API:', error);
