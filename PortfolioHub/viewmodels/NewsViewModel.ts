@@ -1,71 +1,145 @@
 import { useState, useEffect } from 'react';
-import { NewsArticle } from '@/models/NewsArticle';
+import {
+  collection,
+  setDoc,
+  updateDoc,
+  doc,
+  query,
+  getDocs,
+  orderBy,
+  getDoc,
+} from 'firebase/firestore';
 import { POLYGON_KEY } from 'react-native-dotenv';
 import usePortfolioViewModel from '@/viewmodels/PortfolioViewModel';
-
-interface CachedNews {
-  articles: NewsArticle[];
-  lastFetched: number; // Timestamp of the last fetch
-}
+import { auth, firestore } from '@/firebaseConfig';
+import { NewsArticle } from '@/models/NewsArticle';
 
 export const useNewsViewModel = () => {
-  const [newsArticles, setNewsArticles] = useState<{ [ticker: string]: CachedNews }>({});
+  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const { stocks } = usePortfolioViewModel(); // List of stocks
 
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const updatedArticles = { ...newsArticles }; // Copy current state
+        const userId = auth.currentUser?.uid;
+        if (!userId) {
+          console.error('User is not authenticated.');
+          setLoading(false);
+          return;
+        }
+
         const now = Date.now();
-        // Fetch news only for new or stale stocks
+        const oneDay = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
         const promises = stocks.map(async (stock) => {
-          const cachedData = updatedArticles[stock.symbol];
-          const isStale = !cachedData || now - cachedData.lastFetched > 24 * 60 * 60 * 1000;
-          if (isStale) {
+          if (!stock || !stock.symbol) {
+            console.error(`Invalid stock object:`, stock);
+            return;
+          }
+
+          const stockRef = doc(firestore, `users/${userId}/stocks/${stock.symbol}`);
+          const newsRef = collection(firestore, `users/${userId}/stocks/${stock.symbol}/News`);
+
+          // Fetch existing articles and the lastNewsUpdate timestamp from Firestore
+          const stockDoc = await getDoc(stockRef);
+          const lastNewsUpdate = stockDoc.exists() && stockDoc.data().lastNewsUpdate ? new Date(stockDoc.data().lastNewsUpdate).getTime() : 0;
+          let existingArticles: NewsArticle[] = [];
+
+          if (now - lastNewsUpdate > oneDay) {
+            // Fetch new articles
             const response = await fetch(
-              `https://api.polygon.io/v2/reference/news?ticker=${stock.symbol}&limit=5&apiKey=${POLYGON_KEY}`
+              `https://api.polygon.io/v2/reference/news?ticker=${stock.symbol}&limit=4&apiKey=${POLYGON_KEY}`
             );
             const data = await response.json();
+
             if (data.results) {
-              updatedArticles[stock.symbol] = {
-                articles: data.results.map((article: any) => {
-                  // Find the insight object that matches the stock symbol
-                  const matchingInsight = article.insights?.find(
-                    (insight: any) => insight.ticker === stock.symbol
-                  );
-                  return {
-                    title: article.title,
-                    publisher: article.publisher.name,
-                    published_utc: article.published_utc,
-                    ticker: stock.symbol,
-                    sentiment: matchingInsight?.sentiment || 'neutral',
-                    image_url: article.image_url,
-                    url: article.article_url,
-                  };
-                }),
-                lastFetched: now, // Update fetch time
-              };
+              const newArticles = data.results.map((article: any) => ({
+                title: article.title,
+                publisher: article.publisher?.name || 'Unknown',
+                published_utc: article.published_utc,
+                ticker: stock.symbol,
+                sentiment: article.insights?.[0]?.sentiment || 'neutral',
+                image_url: article.image_url,
+                url: article.article_url,
+              }));
+
+              // Fetch existing articles from Firestore
+              const existingDocs = await getDocs(query(newsRef, orderBy('published_utc', 'desc')));
+              existingArticles = existingDocs.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as NewsArticle));
+
+              // Filter out new articles that are duplicates
+              const uniqueArticles = newArticles.filter(
+                (newArticle: { title: string; published_utc: string }) =>
+                  !existingArticles.some(
+                    (existingArticle) =>
+                      existingArticle.title === newArticle.title &&
+                      existingArticle.published_utc === newArticle.published_utc
+                  )
+              );
+
+              // Merge unique new articles with existing articles, limit to the most recent 4
+              const mergedArticles = [...uniqueArticles, ...existingArticles]
+                .sort((a, b) => new Date(b.published_utc).getTime() - new Date(a.published_utc).getTime())
+                .slice(0, 4);
+
+              // Save new unique articles to Firestore using URL as document ID
+              for (const article of uniqueArticles) {
+                const articleDocRef = doc(newsRef, article.title); // Use URL as document ID
+                try {
+                  await setDoc(articleDocRef, article, { merge: true });
+                  console.log(`Successfully added article: ${article.title}`);
+                } catch (err) {
+                  console.error(`Error saving article to Firestore:`, err);
+                }
+              }
+
+              // Update lastNewsUpdate in Firestore stock document
+              try {
+                await updateDoc(stockRef, { lastNewsUpdate: new Date().toISOString() });
+                console.log(`Updated lastNewsUpdate for ${stock.symbol}`);
+              } catch (err) {
+                console.error(`Error updating lastNewsUpdate for ${stock.symbol}:`, err);
+              }
+
+              // Update state with merged articles
+              setNewsArticles((prevArticles) => {
+                const updatedArticles = [...prevArticles, ...mergedArticles];
+                return updatedArticles.filter(
+                  (article, index, self) =>
+                    index === self.findIndex((a) => a.title === article.title && a.published_utc === article.published_utc)
+                );
+              });
             }
+          } else {
+            // Fetch existing articles if no new data is fetched
+            const existingDocs = await getDocs(query(newsRef, orderBy('published_utc', 'desc')));
+            existingArticles = existingDocs.docs.map((doc) => ({ id: doc.id, ...doc.data() } as unknown as NewsArticle));
+            setNewsArticles((prevArticles) => {
+              const updatedArticles = [...prevArticles, ...existingArticles];
+              return updatedArticles.filter(
+                (article, index, self) =>
+                  index === self.findIndex((a) => a.title === article.title && a.published_utc === article.published_utc)
+              );
+            });
           }
         });
+
         // Wait for all promises to complete
         await Promise.all(promises);
-        setNewsArticles(updatedArticles); // Update state with new data
       } catch (error) {
         console.error('Error fetching news:', error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchNews();
   }, [stocks]);
 
   // Flatten articles to simplify consuming them
-  const flattenedArticles = Object.values(newsArticles)
-    .flatMap((cache) => cache.articles)
-    .sort((a, b) => new Date(b.published_utc).getTime() - new Date(a.published_utc).getTime());
+  const flattenedArticles = newsArticles.sort(
+    (a, b) => new Date(b.published_utc).getTime() - new Date(a.published_utc).getTime()
+  );
 
   return { newsArticles: flattenedArticles, loading };
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,24 +6,32 @@ import {
   ScrollView,
   TouchableOpacity,
   ImageBackground,
-  Image,
   ActivityIndicator,
-  Linking,
+  Platform,
 } from 'react-native';
 import { useNewsViewModel } from '@/viewmodels/NewsViewModel';
 import { useTheme } from '@/contexts/ThemeContext';
-import { getHeaderHeight } from '@/hooks/getHeaderHeight'
+import { getHeaderHeight } from '@/hooks/getHeaderHeight';
+import * as WebBrowser from 'expo-web-browser';
 
 const NewsTab = () => {
-  const { newsArticles, loading } = useNewsViewModel();
+  const { loading, newsArticles } = useNewsViewModel();
   const { currentThemeAttributes } = useTheme();
+  const [showContent, setShowContent] = useState(false); // New state to manage showing content
 
   // Flatten and sort articles by latest published date
   const sortedArticles = Object.values(newsArticles)
     .flat()
     .sort((a, b) => new Date(b.published_utc).getTime() - new Date(a.published_utc).getTime());
 
-  if (loading) {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowContent(true);
+    }, 500); // Loading duration
+    return () => clearTimeout(timer); // Clean up the timer on component unmount
+  }, [loading]);
+
+  if (loading || !showContent) {
     return (
       <View style={[styles.loaderContainer, { backgroundColor: currentThemeAttributes.backgroundColor }]}>
         <ActivityIndicator size="large" color={currentThemeAttributes.textShadowColor} />
@@ -31,12 +39,28 @@ const NewsTab = () => {
     );
   }
 
+  if (sortedArticles.length === 0) {
+    return (
+      <View style={[styles.noArticlesContainer, { backgroundColor: currentThemeAttributes.backgroundColor }]}>
+        <Text style={[styles.noArticlesText, { color: currentThemeAttributes.textColor }]}>
+          No News Available!
+        </Text>
+      </View>
+    );
+  }
+
+  const OpenLinkInApp = async (url: string) => {
+    if (Platform.OS !== 'web') {
+      await WebBrowser.openBrowserAsync(url);
+    }
+  };
+
   return (
     <View style={{ backgroundColor: currentThemeAttributes.backgroundColor }}>
       <ScrollView style={{ backgroundColor: currentThemeAttributes.backgroundColor, marginTop: getHeaderHeight() }}>
-      <Text style={[styles.title, {color: currentThemeAttributes.textColor}]}> Portfolio News Highlights </Text>
+        <Text style={[styles.title, { color: currentThemeAttributes.textColor }]}>Portfolio News Highlights</Text>
         {sortedArticles.map((article, index) => (
-          <TouchableOpacity key={index} onPress={() => Linking.openURL(article.url)}>
+          <TouchableOpacity key={index} onPress={() => OpenLinkInApp(article.url)}>
             <View style={{ padding: 20 }}>
               <View style={[styles.articleContainer, { borderColor: getBorderColor(article.sentiment) }]}>
                 <ImageBackground
@@ -57,8 +81,7 @@ const NewsTab = () => {
                         hour: '2-digit',
                         minute: '2-digit',
                         hour12: true // Or false if you prefer 24-hour format
-                      })
-                    }
+                      })}
                     </Text>
                     <Text style={styles.tickerSymbol}>{article.ticker}</Text>
                   </View>
@@ -89,6 +112,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  noArticlesContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 55,
+  },
+  noArticlesText: {
+    fontSize: 24,
+    marginVertical: 10, 
+    paddingHorizontal: 20,
+    textAlign: 'center',
   },
   articleContainer: {
     borderWidth: 2,
