@@ -1,20 +1,54 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Agenda } from 'react-native-calendars';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { Calendar } from 'react-native-calendars';
 import { useTheme } from '@/contexts/ThemeContext';
 import useCalendarViewModel from '@/viewmodels/CalendarViewModel';
 
-const CalendarScreen = () => {
-  const { currentThemeAttributes, theme } = useTheme();
-  const { events, fetchDividendDates, calendarKey } = useCalendarViewModel();
+const ThemedCalendar = () => {
+  const { currentThemeAttributes } = useTheme();
+  const { events } = useCalendarViewModel();
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
-  useEffect(() => {
-    fetchDividendDates(); // Fetch dividend dates when the component mounts
-  }, [fetchDividendDates]);
+  const renderListItem = ({ item }: { item: { name: string } }) => (
+    <View
+      style={[
+        styles.listItem,
+        { backgroundColor: currentThemeAttributes.secondaryBackgroundColor },
+      ]}
+    >
+      <Text style={[styles.listText, { color: currentThemeAttributes.textColor }]}>
+        {item.name}
+      </Text>
+    </View>
+  );
 
-  useEffect(() => {
-    console.log('Theme changed to:', theme); // Log theme changes
-  }, [theme]);
+  const getSelectedDateEvents = () => {
+    return events[selectedDate] || [];
+  };
+
+  // Generate marked dates
+  const getMarkedDates = () => {
+    const marked: Record<string, any> = {};
+
+    Object.keys(events).forEach((date) => {
+      marked[date] = {
+        marked: true, // Show a dot on dates with events
+        dotColor: currentThemeAttributes.iconColor,
+      };
+    });
+
+    // Highlight the selected date
+    if (selectedDate) {
+      marked[selectedDate] = {
+        ...marked[selectedDate], // Preserve existing marking (like dots)
+        selected: true,
+        selectedColor: currentThemeAttributes.iconColor,
+        selectedTextColor: currentThemeAttributes.secondaryBackgroundColor,
+      };
+    }
+
+    return marked;
+  };
 
   return (
     <View
@@ -23,95 +57,65 @@ const CalendarScreen = () => {
         { backgroundColor: currentThemeAttributes.backgroundColor },
       ]}
     >
-      <Text style={[styles.title, { color: currentThemeAttributes.textColor }]}>
-        Calendar
-      </Text>
-      <Agenda
-        key={calendarKey} // Unique key forces re-render on theme change
-        items={events}
-        renderItem={(item) => (
-          <View
-            style={[
-              styles.eventItemContainer,
-              { backgroundColor: currentThemeAttributes.backgroundColor },
-            ]}
-          >
-            <Text
-              style={[
-                styles.eventItem,
-                { color: currentThemeAttributes.textColor },
-              ]}
-            >
-              {item.name}
-            </Text>
-          </View>
-        )}
-        renderEmptyDate={() => (
-          <View
-            style={[
-              styles.emptyDate,
-              { backgroundColor: currentThemeAttributes.backgroundColor },
-            ]}
-          >
-            <Text
-              style={[
-                styles.noEventsText,
-                { color: currentThemeAttributes.textColor },
-              ]}
-            >
-              No events on this date.
-            </Text>
-          </View>
-        )}
+      {/* Calendar */}
+      <Calendar
+        markedDates={getMarkedDates()} // Use marked dates
         theme={{
-          backgroundColor: currentThemeAttributes.backgroundColor,
           calendarBackground: currentThemeAttributes.backgroundColor,
           textSectionTitleColor: currentThemeAttributes.textColor,
-          selectedDayBackgroundColor: '#00adf5',
-          selectedDayTextColor: currentThemeAttributes.backgroundColor,
           dayTextColor: currentThemeAttributes.textColor,
-          textDisabledColor: '#d9e1e8',
-          dotColor: '#00adf5',
-          selectedDotColor: currentThemeAttributes.backgroundColor,
-          arrowColor: currentThemeAttributes.textColor,
+          todayTextColor: currentThemeAttributes.iconColor,
           monthTextColor: currentThemeAttributes.textColor,
-          indicatorColor: currentThemeAttributes.textColor,
-          todayTextColor: '#00adf5',
+          arrowColor: currentThemeAttributes.iconColor,
+          textDisabledColor: '#d9e1e8',
+          dotColor: currentThemeAttributes.iconColor,
+          selectedDotColor: currentThemeAttributes.secondaryBackgroundColor,
         }}
+        onDayPress={(day) => setSelectedDate(day.dateString)}
+        initialDate={new Date().toISOString().split('T')[0]}
+      />
+
+      <Text style={[styles.subtitle, { color: currentThemeAttributes.textColor }]}>
+        Events for {selectedDate}
+      </Text>
+
+      {/* List of events */}
+      <FlatList
+        data={getSelectedDateEvents()}
+        renderItem={renderListItem}
+        keyExtractor={(item, index) => `${selectedDate}-${index}`}
+        style={styles.listContainer}
       />
     </View>
   );
 };
 
+export default ThemedCalendar;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 50,
+    padding: 16,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
+  subtitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 20,
+    marginBottom: 10,
   },
-  eventItemContainer: {
+  listContainer: {
+    flex: 1,
+    marginTop: 10,
+  },
+  listItem: {
+    padding: 16,
+    marginVertical: 8,
     borderRadius: 8,
-    padding: 10,
-    margin: 10,
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 1, height: 2 },
+    shadowRadius: 4,
   },
-  eventItem: {
+  listText: {
     fontSize: 16,
-  },
-  noEventsText: {
-    fontSize: 16,
-    fontStyle: 'italic',
-    textAlign: 'center',
-  },
-  emptyDate: {
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });
-
-export default CalendarScreen;
