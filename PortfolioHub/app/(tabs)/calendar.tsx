@@ -43,7 +43,7 @@ const ThemedCalendar = () => {
         ...marked[selectedDate], // Preserve existing marking (like dots)
         selected: true,
         selectedColor: currentThemeAttributes.iconColor,
-        selectedTextColor: currentThemeAttributes.secondaryBackgroundColor,
+        selectedTextColor: currentThemeAttributes.backgroundColor,
       };
     }
 
