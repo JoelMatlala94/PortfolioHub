@@ -12,10 +12,9 @@ import {
 import { useNewsViewModel } from '@/viewmodels/NewsViewModel';
 import { useTheme } from '@/contexts/ThemeContext';
 import { getHeaderHeight } from '@/hooks/getHeaderHeight';
-import * as WebBrowser from 'expo-web-browser';
 
 const NewsTab = () => {
-  const { loading, newsArticles } = useNewsViewModel();
+  const { loading, newsArticles, OpenLinkInApp, getBorderColor, getTimeAgo } = useNewsViewModel();
   const { currentThemeAttributes } = useTheme();
   const [showContent, setShowContent] = useState(false); // New state to manage showing content
 
@@ -38,27 +37,21 @@ const NewsTab = () => {
       </View>
     );
   }
-
+  //If there are no news articles in the articles list:
   if (sortedArticles.length === 0) {
     return (
       <View style={[styles.noArticlesContainer, { backgroundColor: currentThemeAttributes.backgroundColor }]}>
-        <Text style={[styles.noArticlesText, { color: currentThemeAttributes.textColor }]}>
+        <Text style={[styles.noArticlesText, { color: currentThemeAttributes.textColor, shadowColor: currentThemeAttributes.textShadowColor }]}>
           No News Available!
         </Text>
       </View>
     );
   }
 
-  const OpenLinkInApp = async (url: string) => {
-    if (Platform.OS !== 'web') {
-      await WebBrowser.openBrowserAsync(url);
-    }
-  };
-
   return (
     <View style={{ backgroundColor: currentThemeAttributes.backgroundColor }}>
       <ScrollView style={{ backgroundColor: currentThemeAttributes.backgroundColor, marginTop: getHeaderHeight() }}>
-        <Text style={[styles.title, { color: currentThemeAttributes.textColor }]}>Portfolio News Highlights</Text>
+        <Text style={[styles.title, { color: currentThemeAttributes.textColor, borderBottomColor: currentThemeAttributes.textShadowColor }]}>Portfolio News Highlights</Text>
         {sortedArticles.map((article, index) => (
           <TouchableOpacity key={index} onPress={() => OpenLinkInApp(article.url)}>
             <View style={{ padding: 20 }}>
@@ -69,19 +62,12 @@ const NewsTab = () => {
                   imageStyle={{ borderRadius: 8 }}
                 >
                   <View style={styles.overlay}>
-                    <Text style={styles.articleTitle}>{article.title}</Text>
+                    <Text style={styles.articleTitle}>{article.title.length > 134 ? article.title.substring(0, 134) + "..." : article.title}</Text>
                     <View style={styles.publisherRow}>
                       <Text style={styles.publisherName}>{article.publisher}</Text>
                     </View>
                     <Text style={styles.articleDate}>
-                      {new Date(article.published_utc).toLocaleString(undefined, {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true // Or false if you prefer 24-hour format
-                      })}
+                      {getTimeAgo(article.published_utc)}
                     </Text>
                     <Text style={styles.tickerSymbol}>{article.ticker}</Text>
                   </View>
@@ -93,18 +79,6 @@ const NewsTab = () => {
       </ScrollView>
     </View>
   );
-};
-
-// Helper to get the border color based on sentiment
-const getBorderColor = (sentiment: string) => {
-  switch (sentiment) {
-    case 'positive':
-      return '#00C803';
-    case 'negative':
-      return '#FF5A87';
-    default:
-      return 'grey';
-  }
 };
 
 const styles = StyleSheet.create({
@@ -120,10 +94,11 @@ const styles = StyleSheet.create({
     padding: 55,
   },
   noArticlesText: {
-    fontSize: 24,
+    fontSize: 30,
     marginVertical: 10, 
     paddingHorizontal: 20,
     textAlign: 'center',
+    fontWeight: 'bold',
   },
   articleContainer: {
     borderWidth: 2,
@@ -176,6 +151,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 5,
+    borderBottomWidth: 1,
+    borderBottomStartRadius: 100,
+    borderBottomEndRadius: 100,
+    paddingBottom: 15,
   },
 });
 

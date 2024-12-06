@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ScrollView, Alert, Dimensions } from 'react-nat
 import { PieChart } from 'react-native-chart-kit';
 import useHomeViewModel from '@/viewmodels/HomeViewModel';
 import HomePortfolioView from '@/components/HomePortfolioView';
-import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from "@/contexts/ThemeContext";
 import { getHeaderHeight } from '@/hooks/getHeaderHeight';
 
@@ -13,19 +12,12 @@ const HomePage = () => {
   const {
     stocks,
     error,
-    fetchStocksFromFirebase,
     totalStockQuantity,
     totalStockValue,
   } = useHomeViewModel();
   const { currentThemeAttributes } = useTheme();
   const headerHeight = getHeaderHeight();
   const colors = ['#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#FFD700', '#8A2BE2', '#00FFFF', '#FF4500', '#32CD32', '#1E90FF'];
-
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchStocksFromFirebase();
-    }, [])
-  );
 
   useEffect(() => {
     if (error) {
