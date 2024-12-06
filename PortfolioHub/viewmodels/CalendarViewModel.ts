@@ -5,18 +5,18 @@ export default function useCalendarViewModel() {
   const [events, setEvents] = useState<Record<string, { name: string }[]>>({});
   const { stocks } = usePortfolioViewModel();
 
-  const fetchCalendarEvents = () => {
+  const fetchCalendarEvents = async () => {
     const allEvents: Record<string, { name: string }[]> = {};
 
     stocks.forEach((stock) => {
-      const { symbol, exDividendDate, payDate, dividendAmount } = stock;
+      const { symbol, exDividendDate, payDate, dividendAmount, quantity } = stock;
 
       if (exDividendDate) {
         if (!allEvents[exDividendDate]) {
           allEvents[exDividendDate] = [];
         }
         allEvents[exDividendDate].push({
-          name: `${symbol} Ex-Dividend Date: `,
+          name: `${symbol} Ex-Dividend Date`,
         });
       }
 
@@ -25,7 +25,7 @@ export default function useCalendarViewModel() {
           allEvents[payDate] = [];
         }
         allEvents[payDate].push({
-          name: `${symbol} Pay Date: $${dividendAmount || 'N/A'}`,
+          name: `${symbol} Pay Date: $${dividendAmount || 'N/A'} per share!\n\nTotal Payment: $${(parseFloat(dividendAmount) * quantity).toFixed(2)}`,
         });
       }
     });
@@ -41,5 +41,5 @@ export default function useCalendarViewModel() {
     fetchCalendarEvents();
   }, [stocks]);
 
-  return { events };
+  return { events, fetchCalendarEvents };
 }
