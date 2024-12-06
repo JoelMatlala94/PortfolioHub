@@ -7,4 +7,7 @@ export interface Stock {
     lastUpdate: string;
     date: string;
     lastNewsUpdate: string;
+    exDividendDate: string;
+    payDate: string;
+    dividendAmount: string;
 }  

@@ -2,7 +2,7 @@ import { useAssets } from 'expo-asset';
 import { useState, useEffect } from 'react';
 
 const useIntroViewModel = () => {
-  const [assets, setAssets] = useState(null);
+  const [assets, setAssets] = useState<string | null>(null);
 
   // Fetch assets using the hook
   const [loadedAssets] = useAssets([require('@/assets/videos/intro.mp4')]);

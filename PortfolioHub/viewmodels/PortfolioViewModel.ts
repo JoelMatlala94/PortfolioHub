@@ -5,7 +5,7 @@ import { Stock } from '@/models/Stock';
 import { Alert, Dimensions } from 'react-native';
 import { onAuthStateChanged } from 'firebase/auth';
 import { differenceInMinutes } from 'date-fns';
-import { API_KEY, POLYGON_API_KEY } from 'react-native-dotenv';
+import { API_KEY, POLYGON_KEY } from 'react-native-dotenv';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -43,41 +43,54 @@ export default function usePortfolioViewModel() {
         dividendAmount: 'Error',
       };
     }
-  };
-
-  const fetchStockFromAPI = async (symbol: string): Promise<Stock | null> => {
-    try {
-      const response = await fetch(`https://api.twelvedata.com/quote?symbol=${symbol}&apikey=${API_KEY}`);
-      const data = await response.json();
-      const now = new Date();
-  
-      if (data.code || !data.symbol || !data.name) {
-        Alert.alert('Error', 'Invalid stock symbol or API error. Please try again.');
-        return null;
-      }
-  
-      const dividendData = await fetchDividendData(symbol);
-  
-      console.log(`Stock: ${symbol}`);
-      console.log(`Ex-Dividend Date: ${dividendData.exDividendDate}`);
-      console.log(`Pay Date: ${dividendData.payDate}`);
-      console.log(`Dividend Amount: ${dividendData.dividendAmount}`);
-  
-      return {
-        symbol: data.symbol,
-        name: data.name,
-        quantity: parseInt(stockQuantity) || 0, // Ensure quantity is a number
-        averagePrice: parseFloat(averagePrice || '0'), // Ensure average price is valid
-        date: data.date || now.toISOString().split('T')[0], // Use current date as fallback
-        lastUpdate: now.toISOString(),
-        exDividendDate: dividendData.exDividendDate,
-        payDate: dividendData.payDate,
-        dividendAmount: dividendData.dividendAmount,
-      };
+    const dividendData = await fetchDividendData(symbol);
+    console.log(`Stock: ${symbol}`);
+    console.log(`Ex-Dividend Date: ${dividendData.exDividendDate}`);
+    console.log(`Pay Date: ${dividendData.payDate}`);
+    console.log(`Dividend Amount: ${dividendData.dividendAmount}`);
+    return { 
+      symbol: data.symbol,
+      name: data.name,
+      quantity: parseInt(stockQuantity), 
+      averagePrice: parseFloat(averagePrice || '0'),
+      date: data.date,
+      lastUpdate: now.toISOString(), 
+      lastNewsUpdate: "",
+      exDividendDate: dividendData.exDividendDate,
+      payDate: dividendData.payDate,
+      dividendAmount: dividendData.dividendAmount,
+    };
     } catch (error) {
       console.error('Error fetching stock data from API:', error);
       Alert.alert('Error', 'Failed to fetch stock data.');
       return null;
+    }
+  };
+
+  const fetchDividendData = async (symbol: string) => {
+    try {
+      const response = await fetch(`https://api.polygon.io/v3/reference/dividends?ticker=${symbol}&apiKey=${POLYGON_KEY}`);
+      const data = await response.json();
+      if (data.results && data.results.length > 0) {
+        const dividend = data.results[0]; // Fetch the first result (most recent dividend)
+        return {
+          exDividendDate: dividend.ex_dividend_date || 'N/A',
+          payDate: dividend.pay_date || 'N/A',
+          dividendAmount: dividend.cash_amount || 'N/A',
+        };
+      }
+      return {
+        exDividendDate: 'No data available',
+        payDate: 'No data available',
+        dividendAmount: 'No data available',
+      };
+    } catch (error) {
+      console.error('Error fetching dividend data:', error);
+      return {
+        exDividendDate: 'Error',
+        payDate: 'Error',
+        dividendAmount: 'Error',
+      };
     }
   };
   
@@ -178,7 +191,7 @@ export default function usePortfolioViewModel() {
       collection(firestore, `users/${userID}/stocks`),
       (snapshot) => {
         const updatedStocks = snapshot.docs.map((doc) => doc.data() as Stock);
-        setStocks(updatedStocks);
+        setStocks(updatedStocks); // Update state with the latest data
         fetchStocks();
       },
       (error) => {

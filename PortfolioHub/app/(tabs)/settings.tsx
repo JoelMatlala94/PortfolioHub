@@ -15,7 +15,7 @@ export default function SettingsScreen() {
     handleDeleteAccount,
   } = useSettingsViewModel();
 
-  const themeOptions = [
+  const themeOptions: { label: typeof theme; icon: string }[] = [
     { label: "Automatic", icon: "brightness-auto" },
     { label: "Light", icon: "wb-sunny" },
     { label: "Dark", icon: "dark-mode" },
@@ -64,7 +64,7 @@ export default function SettingsScreen() {
                       shadowColor: currentThemeAttributes.textShadowColor}]}
               onPress={() => setTheme(label)}
             >
-              <MaterialIcons name={icon} size={24} color={currentThemeAttributes.iconColor} />
+              <MaterialIcons name={icon as any} size={24} color={currentThemeAttributes.iconColor} />
               <Text style={[styles.optionText, { color: currentThemeAttributes.textColor }]}>
                 {label}
               </Text>

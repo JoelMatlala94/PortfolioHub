@@ -22,9 +22,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const systemColorScheme = useColorScheme();
   const [theme, setTheme] = useState<Theme>("Automatic");
   const [currentThemeAttributes, setCurrentThemeAttributes] = useState({
-    backgroundColor: "#f0f0f0",
-    textColor: "#000",
-    tintColor: "#9146FF",
+    backgroundColor: "#222",
+    textColor: "#fff",
+    tintColor: "#2346be",
     iconColor: "#FFF",
     check: "#888",
     textShadowColor: "rgba(0, 0, 0, 0.3)"
@@ -40,7 +40,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   useEffect(() => {
-    const selectedTheme = theme === "Automatic" ? systemColorScheme : theme.toLowerCase();
+    const selectedTheme = theme === "Automatic" ? systemColorScheme || "light" : theme.toLowerCase();
     updateThemeAttributes(selectedTheme);
 
     if (theme === "Automatic") {

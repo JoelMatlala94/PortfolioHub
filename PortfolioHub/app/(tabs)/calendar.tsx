@@ -13,7 +13,7 @@ const ThemedCalendar = () => {
     <View
       style={[
         styles.listItem,
-        { backgroundColor: currentThemeAttributes.secondaryBackgroundColor },
+        { backgroundColor: currentThemeAttributes.backgroundColor },
       ]}
     >
       <Text style={[styles.listText, { color: currentThemeAttributes.textColor }]}>
@@ -43,10 +43,9 @@ const ThemedCalendar = () => {
         ...marked[selectedDate], // Preserve existing marking (like dots)
         selected: true,
         selectedColor: currentThemeAttributes.iconColor,
-        selectedTextColor: currentThemeAttributes.secondaryBackgroundColor,
+        selectedTextColor: currentThemeAttributes.backgroundColor,
       };
     }
-
     return marked;
   };
 
@@ -69,7 +68,7 @@ const ThemedCalendar = () => {
           arrowColor: currentThemeAttributes.iconColor,
           textDisabledColor: '#d9e1e8',
           dotColor: currentThemeAttributes.iconColor,
-          selectedDotColor: currentThemeAttributes.secondaryBackgroundColor,
+          selectedDotColor: currentThemeAttributes.iconColor,
         }}
         onDayPress={(day) => setSelectedDate(day.dateString)}
         initialDate={new Date().toISOString().split('T')[0]}
@@ -89,8 +88,6 @@ const ThemedCalendar = () => {
     </View>
   );
 };
-
-export default ThemedCalendar;
 
 const styles = StyleSheet.create({
   container: {
@@ -119,3 +116,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
+export default ThemedCalendar;
