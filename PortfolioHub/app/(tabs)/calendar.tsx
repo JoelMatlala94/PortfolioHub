@@ -46,7 +46,6 @@ const ThemedCalendar = () => {
         selectedTextColor: currentThemeAttributes.backgroundColor,
       };
     }
-
     return marked;
   };
 

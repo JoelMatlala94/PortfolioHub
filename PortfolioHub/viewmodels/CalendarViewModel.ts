@@ -1,57 +1,45 @@
-import { useState, useCallback } from 'react';
-import { Alert } from 'react-native';
+import { useState, useEffect } from 'react';
 import usePortfolioViewModel from '@/viewmodels/PortfolioViewModel';
-import { FMP_API_KEY } from 'react-native-dotenv';
-import { format, addMonths } from 'date-fns';
 
 export default function useCalendarViewModel() {
-  const { stocks } = usePortfolioViewModel(); // Get stocks from PortfolioViewModel
-  const [events, setEvents] = useState({});
-  const [calendarKey, setCalendarKey] = useState(0); // Unique key for forcing re-render
+  const [events, setEvents] = useState<Record<string, { name: string }[]>>({});
+  const { stocks } = usePortfolioViewModel();
 
-  const fetchDividendDates = useCallback(async () => {
-    const newEvents: { [key: string]: { name: string }[] } = {};
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const threeMonthsLater = format(addMonths(new Date(), 3), 'yyyy-MM-dd');
+  const fetchCalendarEvents = () => {
+    const allEvents: Record<string, { name: string }[]> = {};
 
-    try {
-      for (const stock of stocks) {
-        // Add stock-added event
-        if (!newEvents[stock.date]) {
-          newEvents[stock.date] = [{ name: `Stock Added: ${stock.symbol}` }];
+    stocks.forEach((stock) => {
+      const { symbol, exDividendDate, payDate, dividendAmount } = stock;
+
+      if (exDividendDate) {
+        if (!allEvents[exDividendDate]) {
+          allEvents[exDividendDate] = [];
         }
-
-        // Fetch dividend data
-        const response = await fetch(
-          `https://financialmodelingprep.com/api/v3/stock_dividend_calendar?symbol=${stock.symbol}&from=${today}&to=${threeMonthsLater}&apikey=${FMP_API_KEY}`
-        );
-        const data = await response.json();
-
-        if (data && data.length > 0) {
-          data.forEach((dividend: any) => {
-            const dividendDate = dividend.date; // Keep date as string
-            if (!newEvents[dividendDate]) {
-              newEvents[dividendDate] = [];
-            }
-
-            // Add dividend event
-            newEvents[dividendDate].push({
-              name: `${stock.symbol} Dividend: $${dividend.dividend}`,
-            });
-          });
-        }
+        allEvents[exDividendDate].push({
+          name: `${symbol} Ex-Dividend Date: `,
+        });
       }
 
-      setEvents(newEvents); // Update state with fetched events
-    } catch (error) {
-      console.error('Error fetching dividend dates:', error);
-      Alert.alert('Error', 'Failed to fetch dividend dates.');
+      if (payDate) {
+        if (!allEvents[payDate]) {
+          allEvents[payDate] = [];
+        }
+        allEvents[payDate].push({
+          name: `${symbol} Pay Date: $${dividendAmount || 'N/A'}`,
+        });
+      }
+    });
+
+    setEvents(allEvents);
+  };
+
+  useEffect(() => {
+    if (!stocks || stocks.length === 0) {
+      return;
     }
+
+    fetchCalendarEvents();
   }, [stocks]);
 
-  return {
-    events,
-    fetchDividendDates,
-    calendarKey,
-  };
+  return { events };
 }
