@@ -1,13 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { Calendar } from 'react-native-calendars';
+import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '@/contexts/ThemeContext';
 import useCalendarViewModel from '@/viewmodels/CalendarViewModel';
 
 const ThemedCalendar = () => {
   const { currentThemeAttributes } = useTheme();
-  const { events } = useCalendarViewModel();
+  const { events, fetchCalendarEvents } = useCalendarViewModel();
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      setLoading(true);
+      fetchCalendarEvents().finally(() => {
+        setLoading(false);
+      });
+    }, [])
+  );
 
   const renderListItem = ({ item }: { item: { name: string } }) => (
     <View
@@ -29,14 +40,12 @@ const ThemedCalendar = () => {
   // Generate marked dates
   const getMarkedDates = () => {
     const marked: Record<string, any> = {};
-
     Object.keys(events).forEach((date) => {
       marked[date] = {
         marked: true, // Show a dot on dates with events
-        dotColor: currentThemeAttributes.iconColor,
+        dotColor: currentThemeAttributes.tintColor,
       };
     });
-
     // Highlight the selected date
     if (selectedDate) {
       marked[selectedDate] = {
@@ -46,9 +55,21 @@ const ThemedCalendar = () => {
         selectedTextColor: currentThemeAttributes.backgroundColor,
       };
     }
-
     return marked;
   };
+
+  const formatDate = (dateString: string) => {
+    const options = { year: '2-digit', month: '2-digit', day: '2-digit' } as const;
+    return new Date(dateString).toLocaleDateString(undefined, options);  
+  }
+
+  if (loading) {
+    return (
+      <View style={[styles.loaderContainer, { backgroundColor: currentThemeAttributes.backgroundColor }]}>
+        <ActivityIndicator size="large" color={currentThemeAttributes.textShadowColor} />
+      </View>
+    );
+  }
 
   return (
     <View
@@ -71,12 +92,12 @@ const ThemedCalendar = () => {
           dotColor: currentThemeAttributes.iconColor,
           selectedDotColor: currentThemeAttributes.iconColor,
         }}
-        onDayPress={(day) => setSelectedDate(day.dateString)}
+        onDayPress={(day: { dateString: React.SetStateAction<string> }) => setSelectedDate(day.dateString)}
         initialDate={new Date().toISOString().split('T')[0]}
       />
 
       <Text style={[styles.subtitle, { color: currentThemeAttributes.textColor }]}>
-        Events for {selectedDate}
+        Stock Events for {formatDate(selectedDate)}
       </Text>
 
       {/* List of events */}
@@ -115,6 +136,11 @@ const styles = StyleSheet.create({
   },
   listText: {
     fontSize: 16,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
