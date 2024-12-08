@@ -9,6 +9,7 @@ import {
   orderBy,
   getDoc,
 } from 'firebase/firestore';
+// @ts-ignore 
 import { POLYGON_KEY } from 'react-native-dotenv';
 import usePortfolioViewModel from '@/viewmodels/PortfolioViewModel';
 import { auth, firestore } from '@/firebaseConfig';
