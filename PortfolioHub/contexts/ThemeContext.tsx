@@ -13,6 +13,8 @@ interface ThemeContextProps {
     iconColor: string;
     check: string;
     textShadowColor: string;
+    green: string;
+    red: string;
   };
 }
 
@@ -26,15 +28,17 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     textColor: "#fff",
     tintColor: "#2346be",
     iconColor: "#FFF",
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
     check: "#888",
-    textShadowColor: "rgba(0, 0, 0, 0.3)"
+    green: "#00C803",
+    red: "#FF5A87",
   });
 
   const updateThemeAttributes = (selectedTheme: string) => {
     const attributes =
       selectedTheme === "dark"
-        ? { backgroundColor: "#222", textColor: "#fff", tintColor: "#2346be", iconColor: "#FFF", check: "#888", textShadowColor: "rgba(255, 255, 255, 0.3)" }
-        : { backgroundColor: "#f0f0f0", textColor: "#000", tintColor: "#2346be", iconColor: "#888", check: "#222", textShadowColor: "rgba(0, 0, 0, 0.3)" };
+        ? { backgroundColor: "#222", textColor: "#fff", tintColor: "#2346be", iconColor: "#FFF", check: "#888", textShadowColor: "rgba(255, 255, 255, 0.3)", green: "#00C803", red: "#FF5A87" }
+        : { backgroundColor: "#f0f0f0", textColor: "#000", tintColor: "#2346be", iconColor: "#888", check: "#222", textShadowColor: "rgba(0, 0, 0, 0.3)", green: "#00C803", red: "#FF5A87" };
 
     setCurrentThemeAttributes(attributes);
   };

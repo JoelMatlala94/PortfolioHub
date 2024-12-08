@@ -1,6 +1,5 @@
 import React from "react";
-import { Button, StyleSheet, TouchableOpacity } from "react-native";
-import { Text, View } from "@/components/Themed";
+import { Button, StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import { RadioButton } from "react-native-paper";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSettingsViewModel } from "@/viewmodels/SettingsViewModel";

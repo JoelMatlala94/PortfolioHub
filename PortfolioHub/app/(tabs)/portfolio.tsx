@@ -5,6 +5,7 @@ import { LineChart } from 'react-native-chart-kit';
 import { useTheme } from "@/contexts/ThemeContext";
 import usePortfolioViewModel from '@/viewmodels/PortfolioViewModel';
 import { Stock } from '@/models/Stock';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -19,6 +20,7 @@ const PortfolioScreen = () => {
     calculatePercentageGain,
     calculateStockPercentageGain,
     calculateStockValue,
+    totalStockQuantity,
   } = usePortfolioViewModel();
   const { currentThemeAttributes } = useTheme();
   const sortedStocks = stocks.sort((a, b) => (b.currentPrice * b.quantity) - (a.currentPrice * a.quantity));
@@ -31,19 +33,16 @@ const PortfolioScreen = () => {
           {item.name.length > 65 ? item.name.substring(0, 65) + "..." : item.name}
         </Text>
         <Text style={[styles.stockDetails, { color: currentThemeAttributes.textColor }]}>
-          Value: <Text style={[styles.bold, { color: calculateStockPercentageGain(item) >= 0 ? '#00C803' : '#FF5A87' }]}>{(item.quantity*item.currentPrice).toLocaleString("en-US", { style: "currency", currency: "USD" })}</Text>
+          Value: <Text style={[styles.bold, { color: calculateStockPercentageGain(item) >= 0 ? currentThemeAttributes.green : currentThemeAttributes.red }]}>{(item.quantity*item.currentPrice).toLocaleString("en-US", { style: "currency", currency: "USD" })}</Text>
         </Text>
         <Text style={[styles.stockDetails, { color: currentThemeAttributes.textColor }]}>
-          Quantity: <Text style={styles.bold}>{item.quantity}</Text>
+          Quantity: <Text style={styles.bold}>{`${item.quantity} @ ${item.averagePrice.toLocaleString("en-US", { style: "currency", currency: "USD" })}`}</Text>
         </Text>
         <Text style={[styles.stockDetails, { color: currentThemeAttributes.textColor }]}>
-          Total Return: <Text style={[styles.bold, { color: calculateStockValue(item) >= 0 ? '#00C803' : '#FF5A87' }]}>{calculateStockValue(item).toLocaleString("en-US", { style: "currency", currency: "USD" })}</Text>
+          Total Return: <Text style={[styles.bold, { color: calculateStockValue(item) >= 0 ? currentThemeAttributes.green : currentThemeAttributes.red }]}>{calculateStockValue(item).toLocaleString("en-US", { style: "currency", currency: "USD" })}</Text>
         </Text>
         <Text style={[styles.stockDetails, { color: currentThemeAttributes.textColor }]}>
-          Total Percent Change: <Text style={[styles.bold, { color: calculateStockPercentageGain(item) >= 0 ? '#00C803' : '#FF5A87' }]}>{calculateStockPercentageGain(item) !== 0 ? calculateStockPercentageGain(item).toFixed(2) : 'N/A'}%</Text>
-        </Text>
-        <Text style={[styles.stockDetails, { color: currentThemeAttributes.textShadowColor }]}>
-          Average Price: <Text style={styles.bold}>{item.averagePrice.toLocaleString("en-US", { style: "currency", currency: "USD" })}</Text>
+          Total Percent Change: <Text style={[styles.bold, { color: calculateStockPercentageGain(item) >= 0 ? currentThemeAttributes.green : currentThemeAttributes.red }]}>{calculateStockPercentageGain(item) !== 0 ? calculateStockPercentageGain(item).toFixed(2) : 'N/A'}%</Text>
         </Text>
         <Text style={[styles.stockDetails, { color: currentThemeAttributes.textShadowColor }]}>
           Current Price: <Text style={styles.bold}>{item.currentPrice?.toLocaleString("en-US", { style: "currency", currency: "USD" }) || 'N/A'}</Text>
@@ -66,8 +65,9 @@ const PortfolioScreen = () => {
   };
 
   const totalGains = calculateCurrentValue() - calculateTotalReturn();
-  const totalGainsColor = totalGains >= 0 ? '#00C803' : '#FF5A87';
-  const totalPercentageGainColor = calculatePercentageGain() >= 0 ? '#00C803' : '#FF5A87';
+  const iconName = totalGains >= 0 ? "caret-up" : 'caret-down'; 
+  const totalGainsColor = totalGains >= 0 ? currentThemeAttributes.green : currentThemeAttributes.red;
+  const totalPercentageGainColor = calculatePercentageGain() >= 0 ? currentThemeAttributes.green : currentThemeAttributes.red;
 
   return (
     <View style={{ backgroundColor: currentThemeAttributes.backgroundColor, flex: 1 }}>
@@ -91,9 +91,18 @@ const PortfolioScreen = () => {
               </View>
               <View style={styles.row}>
                 <Text style={[styles.summaryText, { color: currentThemeAttributes.textColor }]}>
+                  Total Shares: 
+                </Text>
+                <Text style={[styles.summaryText, styles.bold, { color: currentThemeAttributes.textColor }]}>
+                  {totalStockQuantity.toFixed(2)}
+                </Text>
+              </View>
+              <View style={styles.row}>
+                <Text style={[styles.summaryText, { color: currentThemeAttributes.textColor }]}>
                   Estimated Gains: 
                 </Text>
                 <Text style={[styles.summaryText, styles.bold, { color: totalGainsColor }]}>
+                  <FontAwesome name={iconName} size={14} color={totalGainsColor} />
                   {totalGains.toLocaleString("en-US", { style: "currency", currency: "USD" })}
                 </Text>
               </View>
