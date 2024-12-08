@@ -37,7 +37,7 @@ const useLoginViewModel = () => {
       if (user.emailVerified) {
         await updateDoc(doc(firestore, 'users', user.uid), { emailVerified: true });
         console.log('Email verified and Firestore updated.');
-        router.push('/(tabs)/home'); // Navigate to home screen
+        router.replace('/(tabs)/home'); // Navigate to home screen
       } else {
         Alert.alert('Email Not Verified', 'Please verify your email before logging in.');
         await auth.signOut();

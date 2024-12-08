@@ -11,8 +11,8 @@ export default function RootLayout() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+      <View style={{ flex: 5, justifyContent: 'center', alignItems: 'center', backgroundColor: '#222' }}>
+        <ActivityIndicator size="large" color={'#FFF'} />
       </View>
     );
   }
@@ -42,7 +42,7 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
-          name="ResetPasswordScreen"
+          name="ResetPassword"
           options={{
             title: 'Reset Password',
             headerShown: true,

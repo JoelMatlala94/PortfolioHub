@@ -26,7 +26,7 @@ const useResetPasswordViewModel = () => {
         'Password Reset',
         'If this email is associated with an account, a password reset link has been sent.'
       );
-      router.push('/'); // Navigate to the root screen
+      router.replace('/'); // Navigate to the root screen
     } catch (error) {
         console.error(error.message);
         Alert.alert('Error!', 'An error occurred while sending the password reset link. Please try again later.');

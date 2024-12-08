@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import useAuth from '@/hooks/useAuth';
 import { router } from 'expo-router';
@@ -7,11 +7,13 @@ export default function useRootLayoutViewModel() {
   const { isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
+    const hideSplashScreen = async () => {
+      if (!isLoading) {
+        await SplashScreen.hideAsync();
+      }
+    };
     SplashScreen.preventAutoHideAsync();
-
-    if (!isLoading) {
-      SplashScreen.hideAsync();
-    }
+    hideSplashScreen();
   }, [isLoading]);
 
   useEffect(() => {
