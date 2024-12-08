@@ -4,7 +4,10 @@ export interface Stock {
     quantity: number;
     averagePrice: number;
     currentPrice?: any;
+    annualIncome?: number; 
+    annualYield?: number; 
     lastUpdate: string;
     date: string;
     lastNewsUpdate: string;
-}  
+  }
+  

@@ -18,24 +18,32 @@ export default function usePortfolioViewModel() {
   const [averagePrice, setAveragePrice] = useState(''); 
   const [isAddingStock, setIsAddingStock] = useState(false); 
   const fetchStockFromAPI = async (symbol: string): Promise<Stock | null> => {
-  try {
-    const response = await fetch(`https://api.twelvedata.com/quote?symbol=${symbol}&apikey=${API_KEY}`);
-    const data = await response.json();
-    const now = new Date();
-    if (data.code || !data.symbol || !data.name) {
-      Alert.alert('Error', 'Invalid stock symbol or API error. Please try again.');
-      return null;
-    }
-    const dividendData = await fetchDividendData(auth.currentUser?.uid as string, symbol);
-    return { 
-      symbol: data.symbol,
-      name: data.name,
-      quantity: parseInt(stockQuantity), 
-      averagePrice: parseFloat(averagePrice || '0'),
-      date: data.date,
-      lastUpdate: now.toISOString(), 
-      lastNewsUpdate: "",
-    };
+    try {
+      const response = await fetch(`https://api.twelvedata.com/quote?symbol=${symbol}&apikey=${API_KEY}`);
+      const data = await response.json();
+      const now = new Date();
+      if (data.code || !data.symbol || !data.name) {
+        Alert.alert('Error', 'Invalid stock symbol or API error. Please try again.');
+        return null;
+      }
+      // Default values for quantity and averagePrice (use appropriate logic to set these)
+      const quantity = parseInt(stockQuantity || '0'); 
+      let averagePrice;
+      averagePrice = parseFloat(averagePrice || '0');
+      // Build the stock object
+      const stock: Stock = {
+        symbol: data.symbol,
+        name: data.name,
+        quantity,
+        averagePrice,
+        currentPrice: parseFloat(data.close || '0'),
+        date: data.date,
+        lastUpdate: now.toISOString(),
+        lastNewsUpdate: "",
+      };
+      // Fetch dividend data and update the stock
+      const [updatedStock] = await getAnnualDividend([stock]);
+      return updatedStock;
     } catch (error) {
       console.error('Error fetching stock data from API:', error);
       Alert.alert('Error', 'Failed to fetch stock data.');
@@ -107,8 +115,7 @@ export default function usePortfolioViewModel() {
     const isMarketOpen = () => {
       const now = new Date();
       const day = now.getDay(); // Sunday - Saturday : 0 - 6
-      const hour = now.getHours();
-      // Market open hours: Weekdays 9:30 AM to 4:00 PM
+      const hour = now.getHours(); // Market open hours: Weekdays 9:30 AM to 4:00 PM
       const isWeekday = day > 0 && day < 6; // Monday to Friday
       const isWithinMarketHours = hour >= 9 && (hour < 16 || (hour === 9 && now.getMinutes() >= 30));
       return isWeekday && isWithinMarketHours;
@@ -206,7 +213,7 @@ export default function usePortfolioViewModel() {
 
   const addStock = async () => {
     if (!stockSymbol || !stockQuantity || !averagePrice) {
-      Alert.alert('Error', 'Please enter a stock symbol, a quantity, and an average price paid.');
+      Alert.alert('Missing Symbol, Quantity or Average/Price Paid', 'Please enter a stock symbol, a quantity, and (an average) price paid.');
       return;
     }
     const normalizedSymbol = stockSymbol.trim().toUpperCase(); // Normalize stock symbol
@@ -297,6 +304,33 @@ export default function usePortfolioViewModel() {
 
   const calculateTotalQuantity = () =>
     stocks.reduce((total, stock) => total + stock.quantity, 0);
+
+  const getAnnualDividend = async (stocks: Stock[]): Promise<Stock[]> => {
+    const userID = auth.currentUser?.uid;
+    if (!userID) {
+      throw new Error("User not authenticated");
+    }
+    const updatedStocks = await Promise.all(
+      stocks.map(async (stock) => {
+        const dividendsRef = collection(firestore, `users/${userID}/stocks/${stock.symbol}/Dividends`);
+        const snapshot = await getDocs(dividendsRef);
+  
+        const annualDividend = snapshot.docs.reduce((sum, doc) => {
+          const dividendData = doc.data();
+          return sum + (dividendData.dividendAmount * dividendData.frequency);
+        }, 0);
+  
+        const annualIncome = annualDividend * stock.quantity;
+        const annualYield = (annualDividend / stock.currentPrice) * 100;
+        return {
+          ...stock,
+          annualIncome,
+          annualYield,
+        };
+      })
+    );
+    return updatedStocks;
+  };  
 
   return {
     stocks,

@@ -35,7 +35,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     Object.keys(events).forEach((date) => {
       marked[date] = {
         marked: true,
-        dotColor: currentThemeAttributes.tintColor,
+        dotColor: currentThemeAttributes.green,
       };
     });
 
@@ -43,7 +43,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
       marked[selectedDate] = {
         ...marked[selectedDate],
         selected: true,
-        selectedColor: currentThemeAttributes.tintColor,
+        selectedColor: currentThemeAttributes.textShadowColor,
         selectedTextColor: currentThemeAttributes.textColor,
       };
     }
@@ -71,12 +71,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           calendarBackground: currentThemeAttributes.backgroundColor,
           textSectionTitleColor: currentThemeAttributes.textColor,
           dayTextColor: currentThemeAttributes.textColor,
-          todayTextColor: currentThemeAttributes.iconColor,
+          todayTextColor: currentThemeAttributes.textShadowColor,
           monthTextColor: currentThemeAttributes.textColor,
           arrowColor: currentThemeAttributes.iconColor,
           textDisabledColor: '#d9e1e8',
-          dotColor: currentThemeAttributes.iconColor,
-          selectedDotColor: currentThemeAttributes.iconColor,
+          selectedDotColor: currentThemeAttributes.textShadowColor,
         }}
         onDayPress={(day: { dateString: string; }) => setSelectedDate(day.dateString)}
         initialDate={new Date().toISOString().split('T')[0]}

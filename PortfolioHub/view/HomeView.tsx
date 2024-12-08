@@ -55,8 +55,8 @@ const HomeView = () => {
 
     fetchIncome();
   }, [calculateAnnualIncome, calculateMonthlyIncome, calculateDailyIncome, calculateYield, calculateYieldOnCost]); // Run effect when calculateAnnualIncome changes
-
-  const colors = ['#FF5733', currentThemeAttributes.green, currentThemeAttributes.tintColor, currentThemeAttributes.red, '#FFD700', '#8A2BE2', '#00FFFF', '#FF4500', '#32CD32', '#1E90FF'];
+  //Colors for Pie Chart used for Portfolio Composition
+  const colors = [ currentThemeAttributes.green, currentThemeAttributes.tintColor, currentThemeAttributes.red, '#FF5733', '#FFD700', '#8A2BE2', '#00FFFF', '#FF4500', '#32CD32', '#1E90FF'];
 
   const chartData = stocks.map((item, index) => ({
     name: item.symbol,
@@ -86,8 +86,8 @@ const HomeView = () => {
             {totalStockValue.toLocaleString("en-US", { style: "currency", currency: "USD" })}
           </Text>
           <Text style={[styles.gainsText, { color: iconColor, textShadowColor: iconColor, paddingBottom: 0 }]}>
+            <FontAwesome name={iconName} size={14} color={iconColor} />{' '}
             {calculateReturns().toLocaleString("en-US", { style: "currency", currency: "USD" })}
-            <FontAwesome name={iconName} size={14} color={iconColor} />
           </Text>
           <Text style={[styles.gainsText, { color: iconColor, textShadowColor: iconColor }]}>
             {calculatePercentageGain().toFixed(2)+'%'}
