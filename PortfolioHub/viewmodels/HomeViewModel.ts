@@ -1,5 +1,5 @@
 import { getDocs, collection } from 'firebase/firestore';
-import { firestore, auth } from '@/firebaseConfig'; // Adjust import as per your project structure
+import { firestore, auth } from '@/firebaseConfig'; 
 import usePortfolioViewModel from '@/viewmodels/PortfolioViewModel';
 import { useCallback, useMemo } from 'react';
 
@@ -62,6 +62,68 @@ const useHomeViewModel = () => {
     return (annualIncome / costBasis) * 100;
   }, [calculateAnnualIncome, calculateCostBasis]);
 
+  const calculateRecentDivChanges = useCallback(async () => {
+    const recentDivChanges = [];
+    const today = new Date();
+  
+    for (const stock of stocks) {
+      try {
+        // Reference to the Dividends subcollection for the stock
+        const divChangesRef = collection(firestore, `users/${userID}/stocks/${stock.symbol}/Dividends`);
+        const snapshot = await getDocs(divChangesRef);
+        if (!snapshot.empty) {
+          // Extract and sort dividend data by exDivDate (document ID as Date), descending
+          const dividends = snapshot.docs
+            .map(doc => {
+              const data = doc.data() as DividendData;
+              const exDivDate = new Date(doc.id); // Document ID is the ex-dividend date
+              return {
+                symbol: stock.symbol,
+                dividendAmount: data.dividendAmount || 0,
+                exDivDate,
+                payDate: data.payDate || "Unknown Pay Date",
+              };
+            })
+            .sort((a, b) => b.exDivDate.getTime() - a.exDivDate.getTime());
+          // Compare the two most recent dividends
+          if (dividends.length >= 2) {
+            const latest = dividends[0];
+            const previous = dividends[1];
+  
+            if (latest.dividendAmount !== previous.dividendAmount) {
+              recentDivChanges.push({
+                symbol: stock.symbol,
+                oldDividend: previous.dividendAmount,
+                newDividend: latest.dividendAmount,
+                exDivDate: latest.exDivDate,
+                payDate: latest.payDate,
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`Error fetching recent dividend changes for ${stock.symbol}:`, error);
+      }
+    }
+    // Sort changes by ex-dividend date, descending (most recent first)
+    const sortedChanges = recentDivChanges.sort((a, b) => b.exDivDate.getTime() - a.exDivDate.getTime());
+    // Return structured output for UI
+    if (sortedChanges.length === 0) {
+      return "No Recent Dividend Changes";
+    }
+    return sortedChanges.map(change => {
+      const { symbol, oldDividend, newDividend, exDivDate, payDate } = change;
+      const formattedDate = exDivDate.toLocaleDateString("en-US");
+      return {
+        symbol,
+        oldDividend: oldDividend,
+        newDividend: newDividend,
+        exDivDate: formattedDate,
+        payDate,
+      };
+    });
+  }, [stocks, userID]);  
+  
   return {
     stocks,
     totalStockValue: useMemo(() => calculateCurrentValue(), [calculateCurrentValue]),
@@ -70,6 +132,7 @@ const useHomeViewModel = () => {
     calculateDailyIncome,
     calculateYield,
     calculateYieldOnCost,
+    calculateRecentDivChanges,
   };
 };
 

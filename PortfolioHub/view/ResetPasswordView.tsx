@@ -17,7 +17,7 @@ import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import useResetPasswordViewModel from '@/viewmodels/ResetPasswordViewModel';
 
-const ResetPasswordScreen = () => {
+const ResetPasswordView = () => {
   const router = useRouter();
   const { email, setEmail, isLoading, handlePasswordReset } = useResetPasswordViewModel();
 
@@ -153,4 +153,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ResetPasswordScreen;
+export default ResetPasswordView;
