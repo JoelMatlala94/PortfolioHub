@@ -51,7 +51,11 @@ const NewsView = () => {
   return (
     <View style={{ backgroundColor: currentThemeAttributes.backgroundColor }}>
       <ScrollView style={{ backgroundColor: currentThemeAttributes.backgroundColor, marginTop: getHeaderHeight() }}>
-        <Text style={[styles.title, { color: currentThemeAttributes.textColor, borderBottomColor: currentThemeAttributes.textShadowColor }]}>Portfolio News Highlights</Text>
+        <Text style={[styles.title, 
+          { color: currentThemeAttributes.textColor, 
+            borderBottomColor: currentThemeAttributes.textShadowColor }]}>
+          Portfolio News Highlights
+        </Text>
         {sortedArticles.map((article, index) => (
           <TouchableOpacity key={index} onPress={() => OpenLinkInApp(article.url)}>
             <View style={{ padding: 20 }}>

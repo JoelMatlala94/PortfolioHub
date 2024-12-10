@@ -30,6 +30,10 @@ const PortfolioView = () => {
   const totalPercentageGainColor = calculatePercentageGain() >= 0 ? currentThemeAttributes.green : currentThemeAttributes.red;
   
   const renderStockItem = ({ item }: { item: Stock }) => {
+    const isGain = calculateStockPercentageGain(item) >= 0;
+    const iconName = isGain ? "caret-up" : 'caret-down'; 
+    const gainsColor = isGain ? currentThemeAttributes.green : currentThemeAttributes.red
+    
     return (
         <View style={[styles.stockItem, { borderBottomColor: currentThemeAttributes.textShadowColor }]}>
         <View style={[styles.stockInfo, { backgroundColor: currentThemeAttributes.backgroundColor }]}>
@@ -39,7 +43,7 @@ const PortfolioView = () => {
             </Text>
             <Text style={[styles.stockDetails, { color: currentThemeAttributes.textColor }]}>
             Value: 
-            <Text style={[styles.bold, { color: calculateStockPercentageGain(item) >= 0 ? currentThemeAttributes.green : currentThemeAttributes.red }]}>
+            <Text style={[styles.bold, { color: gainsColor }]}>
                 {` ${(item.quantity*item.currentPrice).toLocaleString("en-US", { style: "currency", currency: "USD" })}`}
             </Text>
             </Text>
@@ -51,8 +55,8 @@ const PortfolioView = () => {
             </Text>
             <Text style={[styles.stockDetails, { color: currentThemeAttributes.textColor }]}>
             Total Return:  
-            <Text style={[styles.bold, { color: calculateStockValue(item) >= 0 ? currentThemeAttributes.green : currentThemeAttributes.red }]}>
-                {' '}<FontAwesome name={iconName} size={14} color={totalGainsColor} /> 
+            <Text style={[styles.bold, { color: gainsColor }]}>
+                {' '}<FontAwesome name={iconName} size={14} color={gainsColor} /> 
                 {` ${calculateStockValue(item).toLocaleString("en-US", { style: "currency", currency: "USD" })}`}
                 {` @ ${calculateStockPercentageGain(item) !== 0 ? calculateStockPercentageGain(item).toFixed(2) : 'N/A'}%`}
             </Text>
