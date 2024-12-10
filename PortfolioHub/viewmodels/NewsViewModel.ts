@@ -76,9 +76,9 @@ export const useNewsViewModel = () => {
               const mergedArticles = [...uniqueArticles, ...existingArticles]
                 .sort((a, b) => new Date(b.published_utc).getTime() - new Date(a.published_utc).getTime())
                 .slice(0, 4);
-              // Save new unique articles to Firestore using URL as document ID
+              // Save new unique articles to Firestore using sanitized titles as document IDs
               for (const article of uniqueArticles) {
-                const articleDocRef = doc(newsRef, article.title); // Use Title as document ID
+                const articleDocRef = doc(newsRef, sanitizeTitle(article.title)); // Use sanitized title as document ID
                 try {
                   await setDoc(articleDocRef, article, { merge: true });
                   console.log(`Successfully added article: ${article.title}`);
@@ -130,6 +130,10 @@ export const useNewsViewModel = () => {
   const flattenedArticles = newsArticles.sort(
     (a, b) => new Date(b.published_utc).getTime() - new Date(a.published_utc).getTime()
   );
+
+  const sanitizeTitle = (title: string) => {
+    return title.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '-').toLowerCase();
+  };  
 
   const OpenLinkInApp = async (url: string) => {
     if (Platform.OS !== 'web') {

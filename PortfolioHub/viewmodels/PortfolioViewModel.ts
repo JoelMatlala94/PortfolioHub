@@ -11,6 +11,7 @@ import { API_KEY, POLYGON_KEY } from 'react-native-dotenv';
 const screenWidth = Dimensions.get('window').width;
 
 export default function usePortfolioViewModel() {
+  const user = auth.currentUser;
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [showChart, setShowChart] = useState(false);  
   const [stockSymbol, setStockSymbol] = useState(''); 
@@ -42,6 +43,7 @@ export default function usePortfolioViewModel() {
         lastNewsUpdate: "",
       };
       // Fetch dividend data and update the stock
+      fetchDividendData(user?.uid || 'N/A', symbol);
       const [updatedStock] = await getAnnualDividend([stock]);
       return updatedStock;
     } catch (error) {
@@ -107,7 +109,6 @@ export default function usePortfolioViewModel() {
   };
 
   const fetchStocks = async () => {
-    const user = auth.currentUser;
     if (!user) {
       Alert.alert('Error', 'No user is logged in.');
       return;

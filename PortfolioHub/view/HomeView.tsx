@@ -175,15 +175,20 @@ const HomeView = () => {
 
         {/* Portfolio Composition Section */}
         <View style={ styles.container }>
+        <View style={[styles.chartContainer, {borderColor: currentThemeAttributes.textShadowColor}]}>
           <Text
             style={[
               styles.title,
-              { color: currentThemeAttributes.textColor, shadowColor: currentThemeAttributes.textColor },
+              { color: currentThemeAttributes.textColor, 
+                borderColor: currentThemeAttributes.textShadowColor,
+                shadowColor: currentThemeAttributes.textColor,
+                paddingTop: 10,
+              },
             ]}
           >
             Portfolio Composition
           </Text>
-          <View style={styles.chartContainer}>
+          
             <PieChart
               data={chartData}
               width={screenWidth}
@@ -262,7 +267,7 @@ const styles = StyleSheet.create({
   },
   sectionContainer: {
     marginBottom: 20,
-    padding: 8,
+    padding: 10,
     borderRadius: 10,
     borderWidth: 1,
     shadowOpacity: 0.8,
@@ -309,6 +314,14 @@ const styles = StyleSheet.create({
   chartContainer: {
     borderRadius: 10,
     alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomStartRadius: 25,
+    borderBottomEndRadius: 25,
+    borderTopWidth: 1,
+    borderTopStartRadius: 25,
+    borderTopEndRadius: 25,
+    //borderLeftWidth: 1,
+    //borderRightWidth: 1,
   },
   symbolText: {
     fontSize: 16,
