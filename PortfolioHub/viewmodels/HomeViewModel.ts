@@ -122,7 +122,34 @@ const useHomeViewModel = () => {
         payDate,
       };
     });
-  }, [stocks, userID]);  
+  }, [stocks, userID]);
+
+  const calculateDividendsReceivable = useCallback(async () => {
+    let totalReceivable = 0;
+    for (const stock of stocks) {
+      try {
+        const dividendsRef = collection(firestore, `users/${userID}/stocks/${stock.symbol}/Dividends`);
+        const snapshot = await getDocs(dividendsRef);
+        const receivableDividends = snapshot.docs.reduce((sum, doc) => {
+          const data = doc.data() as DividendData;
+          const payDate = new Date(data.payDate);
+          const today = new Date();
+          // Check if payDate is in the future and add to the receivable amount
+          if (payDate > today) {
+            return sum + (data.dividendAmount * stock.quantity);
+          }
+          return sum;
+        }, 0);
+        totalReceivable += receivableDividends;
+      } catch (error) {
+        console.error(`Error calculating dividends receivable for ${stock.symbol}:`, error);
+      }
+    }
+    if (totalReceivable === 0) {
+      return "No Dividends Receivable";
+    }
+    return totalReceivable;
+  }, [stocks, userID]);
   
   return {
     stocks,
@@ -133,6 +160,7 @@ const useHomeViewModel = () => {
     calculateYield,
     calculateYieldOnCost,
     calculateRecentDivChanges,
+    calculateDividendsReceivable,
   };
 };
 

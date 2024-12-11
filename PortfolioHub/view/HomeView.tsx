@@ -19,6 +19,7 @@ const HomeView = () => {
     calculateYield,
     calculateYieldOnCost,
     calculateRecentDivChanges,
+    calculateDividendsReceivable,
   } = useHomeViewModel();
   const {calculatePercentageGain, calculateReturns} = usePortfolioViewModel();
 
@@ -30,6 +31,7 @@ const HomeView = () => {
   const [divYield, setYield] = useState<number | null>(null); // Allow null and number
   const [divYieldonCost, setYieldonCost] = useState<number | null>(null); // Allow null and number
   const [recentDivChanges, setRecentDivChanges] = useState<DividendChange[] | null | string>(null);
+  const [dividendsReceivable, setDividendsReceivable] = useState<number | null | string>(null);
   const [loading, setLoading] = useState(true); // Loading state
 
   useEffect(() => {
@@ -54,8 +56,8 @@ const HomeView = () => {
     };
 
     fetchIncome();
-  }, [calculateAnnualIncome, calculateMonthlyIncome, calculateDailyIncome, calculateYield, calculateYieldOnCost]); // Run effect when calculateAnnualIncome changes
-
+  }, [calculateAnnualIncome, calculateMonthlyIncome, calculateDailyIncome, calculateYield, calculateYieldOnCost ]); // Run effect when calculateAnnualIncome changes
+  //Recent Dividend Changes Fetch
   useEffect(() => {
     let isMounted = true; // Track component mount status to avoid state updates on unmounted components
     const fetchRecentDivChanges = async () => {
@@ -81,7 +83,33 @@ const HomeView = () => {
       isMounted = false; // Clean up to prevent state updates on unmounted components
     };
   }, [calculateRecentDivChanges]);
-
+  //Dividends Receivable Fetch
+  useEffect(() => {
+    let isMounted = true; // Track component mount status to avoid state updates on unmounted components
+    const fetchDividendsReceivable = async () => {
+      setLoading(true);
+      try {
+        const receivable = await calculateDividendsReceivable();
+        if (isMounted) {
+          setDividendsReceivable(receivable);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setRecentDivChanges("Error loading data");
+          console.error("Error fetching dividends receivable:", error);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false); // Ensure loading state is reset
+        }
+      }
+    };
+    fetchDividendsReceivable();
+    return () => {
+      isMounted = false; // Clean up to prevent state updates on unmounted components
+    };
+  }, [calculateDividendsReceivable]);
+  
   //Colors for Pie Chart used for Portfolio Composition
   const colors = [ currentThemeAttributes.green, currentThemeAttributes.tintColor, currentThemeAttributes.red, '#FF5733', '#FFD700', '#8A2BE2', '#00FFFF', '#FF4500', '#32CD32', '#1E90FF'];
 
@@ -172,7 +200,25 @@ const HomeView = () => {
             </Text>
           </View>
         </View>
-
+        {/* Dividends Receivable Section */}
+        <View style={[styles.sectionContainer, { borderColor: currentThemeAttributes.textShadowColor }]}>
+          <Text style={[styles.sectionTitle, { color: currentThemeAttributes.textColor }]}>
+            Dividends Receivable
+          </Text>
+          {loading ? (
+            <Text style={[styles.divChangeText, { color: currentThemeAttributes.textShadowColor }]}>
+              ...
+            </Text>
+          ) : dividendsReceivable === null || dividendsReceivable === "No Dividends Receivable" ? (
+            <Text style={[styles.noDivChangesText, { color: currentThemeAttributes.textShadowColor }]}>
+              No Dividends Receivable
+            </Text>
+          ) : (
+              <Text style={[styles.summaryText, { color: currentThemeAttributes.green, fontSize: 25 }]}>
+                {dividendsReceivable?.toLocaleString("en-US", { style: "currency", currency: "USD" })}
+              </Text>
+          )}
+        </View>
         {/* Portfolio Composition Section */}
         <View style={ styles.container }>
         <View style={[styles.chartContainer, {borderColor: currentThemeAttributes.textShadowColor}]}>
@@ -269,6 +315,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 10,
     borderRadius: 10,
+    marginHorizontal: 10,
     borderWidth: 1,
     shadowOpacity: 0.8,
     shadowOffset: { width: 1, height: 1 },
@@ -309,9 +356,10 @@ const styles = StyleSheet.create({
   },
   summaryText: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '900',
   },
   chartContainer: {
+    marginTop: -20,
     borderRadius: 10,
     alignItems: 'center',
     borderBottomWidth: 1,
@@ -320,8 +368,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopStartRadius: 25,
     borderTopEndRadius: 25,
-    //borderLeftWidth: 1,
-    //borderRightWidth: 1,
+
   },
   symbolText: {
     fontSize: 16,
