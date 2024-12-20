@@ -1,6 +1,6 @@
 # PortfolioHub
 
-PortfolioHub is an IOS/Android/Mobile Web Application that is a Stock Portfolio/Dividend Tracker mobile app. The app is designed to assist users in visualizing their stock portfolio and the dividend income associated with their portfolio, which will be updated in real time using various stock market APIs.
+PortfolioHub is an IOS/Android Stock Portfolio/Dividend Tracker mobile app. The app is designed to assist users in visualizing their stock portfolio and the dividend income associated with their portfolio, which will be updated in real-time using various stock market APIs.
 
 ## Authors
 
