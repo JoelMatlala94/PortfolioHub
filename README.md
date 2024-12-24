@@ -20,10 +20,15 @@ PortfolioHub is a IOS/Android Stock Portfolio/Dividend Tracker mobile app. The a
 ###
 
 ### Home
+
+###
+
 <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 25px;">
    <img src="./screenshots/5.png" width=30% style="margin: 0 10px;">
    <img src="./screenshots/6.png" width=30% style="margin: 0 10px;">
 </div>
+
+###
 
 ### Portfolio
 <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 25px;">
